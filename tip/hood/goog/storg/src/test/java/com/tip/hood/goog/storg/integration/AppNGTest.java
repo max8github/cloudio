@@ -70,7 +70,7 @@ public class AppNGTest {
                 + "in your ~/.m2/settings.xml file (read about settings.xml "
                 + "properties in Maven)");
         TUtility.assertFileExists(keysFilePath);
-        
+
         httpTransport = GoogleNetHttpTransport.newTrustedTransport();
         JSON_FACTORY = JacksonFactory.getDefaultInstance();
 
@@ -104,6 +104,11 @@ public class AppNGTest {
         HttpRequestFactory requestFactory = httpTransport.createRequestFactory(credential);
         GenericUrl url = new GenericUrl(URI);
         HttpRequest request = requestFactory.buildGetRequest(url);
+
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.set("access_type", "offline");
+//        request.setHeaders(headers);
+
         HttpResponse response = request.execute();
         String content = response.parseAsString();
 
