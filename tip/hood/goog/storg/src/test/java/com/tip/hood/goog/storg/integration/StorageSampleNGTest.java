@@ -1,6 +1,3 @@
-/*
- * 
- */
 package com.tip.hood.goog.storg.integration;
 
 import com.google.api.client.auth.oauth2.Credential;
@@ -9,23 +6,39 @@ import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.googleapis.json.GoogleJsonError;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.client.googleapis.media.MediaHttpDownloader;
+import com.google.api.client.googleapis.media.MediaHttpDownloaderProgressListener;
+import com.google.api.client.googleapis.media.MediaHttpUploader;
+import com.google.api.client.googleapis.media.MediaHttpUploaderProgressListener;
 import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.InputStreamContent;
+import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.util.Key;
+import com.google.api.client.util.Lists;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.StorageScopes;
 import com.google.api.services.storage.model.Bucket;
+import com.google.api.services.storage.model.ObjectAccessControl;
 import com.google.api.services.storage.model.StorageObject;
+import com.google.common.base.Stopwatch;
+import com.google.common.collect.ImmutableMap;
+import com.tip.hood.itest.testutil.RandomContent;
 import com.tip.hood.itest.testutil.TUtility;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import static java.net.HttpURLConnection.HTTP_CONFLICT;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.Random;
 import java.util.Set;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
@@ -37,12 +50,14 @@ import org.testng.annotations.Test;
  * Sample code from Google Cloud Storage - Java Example. See
  * https://cloud.google.com/storage/docs/json_api/v1/json-api-java-samples . Can also do: git clone
  * https://github.com/GoogleCloudPlatform/cloud-storage-docs-json-api-examples.git except that that example needs to be
- * recompiled to make it work.
+ * recompiled to make it work. Javadoc at:
+ * https://developers.google.com/resources/api-libraries/documentation/storage/v1/java/latest/ Adapted part of this code
+ * also from: com.google.api.services.samples.storage.cmdline.StorageSample.
  */
 public class StorageSampleNGTest {
 
     private static String BUCKET_NAME;
-
+    private static JsonFactory jsonFactory;
     private static Storage client;
 
     public StorageSampleNGTest() {
@@ -65,8 +80,8 @@ public class StorageSampleNGTest {
         // Initialize transport...
         HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
         //then json factory...
-        JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
-        
+        jsonFactory = JacksonFactory.getDefaultInstance();
+
         //...then data store factory. Best practice is to make it a single globally shared
         //instance across your application.
         FileDataStoreFactory dataStoreFactory = new FileDataStoreFactory(dataStoreDir);
@@ -91,21 +106,28 @@ public class StorageSampleNGTest {
     }
 
     @Test
-    public void testStorageSample() throws Exception {
-        System.out.println("storageSample");
+    public void testBucket() throws Exception {
+        System.out.println("testBucket");
 
         // Get metadata about the specified bucket.
         Storage.Buckets.Get getBucket = client.buckets().get(BUCKET_NAME);
         getBucket.setProjection("full");
         Bucket bucket = getBucket.execute();
-        System.out.println("name: " + BUCKET_NAME);
-        System.out.println("location: " + bucket.getLocation());
-        System.out.println("timeCreated: " + bucket.getTimeCreated());
-        System.out.println("owner: " + bucket.getOwner());
+        View.separator();
+        View.show(bucket);
+    }
 
-        // List the contents of the bucket.
+    /**
+     * List the contents of the bucket.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testListObjects() throws Exception {
+        System.out.println("testListObjects");
         Storage.Objects.List listObjects = client.objects().list(BUCKET_NAME);
         com.google.api.services.storage.model.Objects objects;
+        View.header1("objects in bucket, start");
         do {
             objects = listObjects.execute();
             List<StorageObject> items = objects.getItems();
@@ -116,9 +138,197 @@ public class StorageSampleNGTest {
             for (StorageObject object : items) {
                 System.out.println(object.getName() + " (" + object.getSize() + " bytes)");
             }
+
             listObjects.setPageToken(objects.getNextPageToken());
         } while (null != objects.getNextPageToken());
+        View.separator();
+    }
 
+    @Test
+    public void testCreateBucket() throws Exception {
+        InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("conf/sample_settings.json");
+        SampleSettings settings = SampleSettings.load(jsonFactory, in);
+        View.header1("Trying to create bucket '" + settings.getBucket() + "'");
+        Storage.Buckets.Insert insertBucket = client.buckets()
+                .insert(settings.getProject(), new Bucket().setName(settings.getBucket())
+                //                .setDefaultObjectAcl(ImmutableList.of(
+                //                new ObjectAccessControl().setEntity("allAuthenticatedUsers").setRole("READER")))
+                );
+        try {
+            @SuppressWarnings("unused")
+            Bucket createdBucket = insertBucket.execute();
+            System.out.println("Created bucket '" + createdBucket + "'");
+        } catch (GoogleJsonResponseException e) {
+            GoogleJsonError error = e.getDetails();
+            if (error.getCode() == HTTP_CONFLICT
+                    && error.getMessage().contains("You already own this bucket.")) {
+                System.out.println("already exists");
+            } else {
+                throw e;
+            }
+        }
+    }
+
+    @Test
+    public void testPutObj() throws Exception {
+        InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("conf/sample_settings.json");
+        SampleSettings settings = SampleSettings.load(jsonFactory, in);
+        boolean useCustomMetadata = false;
+        View.header1("Uploading object.");
+        File file = TUtility.createTFileWithContent("poem01.txt", RandomContent.createPoem(5));
+        InputStreamContent mediaContent = new InputStreamContent("text/plain", new FileInputStream(file));
+        // Not strictly necessary, but allows optimization in the cloud.
+        mediaContent.setLength(file.length());
+
+        StorageObject objectMetadata = null;
+
+        if (useCustomMetadata) {
+            // If you have custom settings for metadata on the object you want to set
+            // then you can allocate a StorageObject and set the values here. You can
+            // leave out setBucket(), since the bucket is in the insert command's
+            // parameters.
+            List<ObjectAccessControl> acl = Lists.newArrayList();
+            if (settings.getEmail() != null && !settings.getEmail().isEmpty()) {
+                acl.add(
+                        new ObjectAccessControl().setEntity("user-" + settings.getEmail()).setRole("OWNER"));
+            }
+            if (settings.getDomain() != null && !settings.getDomain().isEmpty()) {
+                acl.add(new ObjectAccessControl().setEntity("domain-" + settings.getDomain())
+                        .setRole("READER"));
+            }
+            objectMetadata = new StorageObject().setName(settings.getPrefix() + "myobject")
+                    .setMetadata(ImmutableMap.of("key1", "value1", "key2", "value2")).setAcl(acl)
+                    .setContentDisposition("attachment");
+        }
+
+        Storage.Objects.Insert insertObject
+                = client.objects().insert(settings.getBucket(), objectMetadata, mediaContent);
+
+        if (!useCustomMetadata) {
+            // If you don't provide metadata, you will have specify the object
+            // name by parameter. You will probably also want to ensure that your
+            // default object ACLs (a bucket property) are set appropriately:
+            // https://developers.google.com/storage/docs/json_api/v1/buckets#defaultObjectAcl
+            insertObject.setName(settings.getPrefix() + "01");
+        }
+
+        insertObject.getMediaHttpUploader()
+                .setProgressListener(new CustomUploadProgressListener()).setDisableGZipContent(true);
+        //For small files where content length is not specified, you may wish to call setDirectUploadEnabled(true), to
+        //reduce the number of HTTP requests made to the server.
+//        if (mediaContent.getLength() > 0 && mediaContent.getLength() <= 2 * 1000 * 1000 /* 2MB */) {
+//            insertObject.getMediaHttpUploader().setDirectUploadEnabled(true);
+//        }
+        insertObject.execute();
+    }
+
+    private static class CustomUploadProgressListener implements MediaHttpUploaderProgressListener {
+
+        private final Stopwatch stopwatch = new Stopwatch();
+
+        public CustomUploadProgressListener() {
+        }
+
+        @Override
+        public void progressChanged(MediaHttpUploader uploader) {
+            switch (uploader.getUploadState()) {
+                case INITIATION_STARTED:
+                    stopwatch.start();
+                    System.out.println("Initiation has started!");
+                    break;
+                case INITIATION_COMPLETE:
+                    System.out.println("Initiation is complete!");
+                    break;
+                case MEDIA_IN_PROGRESS:
+                    // TODO(nherring): Progress works iff you have a content length specified.
+                    // System.out.println(uploader.getProgress());
+                    System.out.println(uploader.getNumBytesUploaded());
+                    break;
+                case MEDIA_COMPLETE:
+                    stopwatch.stop();
+                    System.out.println(String.format("Upload is complete! (%s)", stopwatch));
+                    break;
+                case NOT_STARTED:
+                    break;
+            }
+        }
+    }
+
+    private static class CustomDownloadProgressListener implements MediaHttpDownloaderProgressListener {
+
+        private final Stopwatch stopwatch;
+
+        public CustomDownloadProgressListener(final Stopwatch stopwatch) {
+            this.stopwatch = stopwatch;
+        }
+
+        @Override
+        public void progressChanged(MediaHttpDownloader downloader) {
+            switch (downloader.getDownloadState()) {
+                case MEDIA_IN_PROGRESS:
+                    System.out.println(downloader.getProgress());
+                    break;
+                case MEDIA_COMPLETE:
+                    stopwatch.stop();
+                    System.out.println(String.format("Download is complete! (%s)", stopwatch));
+                    break;
+                case NOT_STARTED:
+                    break;
+            }
+        }
+    }
+
+    /**
+     * Generates a random data block and repeats it to provide the stream.
+     *
+     * Using a buffer instead of just filling from java.util.Random because the latter causes noticeable lag in stream
+     * reading, which detracts from upload speed. This class takes all that cost in the constructor.
+     */
+    private static class RandomDataBlockInputStream extends InputStream {
+
+        private long byteCountRemaining;
+        private final byte[] buffer;
+
+        public RandomDataBlockInputStream(long size, int blockSize) {
+            byteCountRemaining = size;
+            final Random random = new Random();
+            buffer = new byte[blockSize];
+            random.nextBytes(buffer);
+        }
+
+        /*
+         * (non-Javadoc)
+         *
+         * @see java.io.InputStream#read()
+         */
+        @Override
+        public int read() {
+            throw new AssertionError("Not implemented; too slow.");
+        }
+
+        /*
+         * (non-Javadoc)
+         *
+         * @see java.io.InputStream#read(byte [], int, int)
+         */
+        @Override
+        public int read(byte b[], int off, int len) {
+            if (b == null) {
+                throw new NullPointerException();
+            } else if (off < 0 || len < 0 || len > b.length - off) {
+                throw new IndexOutOfBoundsException();
+            } else if (len == 0) {
+                return 0;
+            } else if (byteCountRemaining == 0) {
+                return -1;
+            }
+            int actualLen = len > byteCountRemaining ? (int) byteCountRemaining : len;
+            for (int i = off; i < actualLen; i++) {
+                b[i] = buffer[i % buffer.length];
+            }
+            byteCountRemaining -= actualLen;
+            return actualLen;
+        }
     }
 
     /**
@@ -161,5 +371,48 @@ public class StorageSampleNGTest {
         // Authorize.
         return new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
     }
+
+    /**
+     * Provides simple command line UI.
+     */
+    public static class View {
+
+        static void header1(String name) {
+            System.out.println();
+            System.out.println("================== " + name + " ==================");
+            System.out.println();
+        }
+
+        static void header2(String name) {
+            System.out.println();
+            System.out.println("~~~~~~~~~~~~~~~~~~ " + name + " ~~~~~~~~~~~~~~~~~~");
+            System.out.println();
+        }
+
+        static void show(Bucket bucket) {
+            System.out.println("name: " + bucket.getName());
+            System.out.println("location: " + bucket.getLocation());
+            System.out.println("timeCreated: " + bucket.getTimeCreated());
+            System.out.println("owner: " + bucket.getOwner());
+            System.out.println("acl: " + bucket.getAcl());
+        }
+
+        static void show(StorageObject object) {
+            System.out.println("name: " + object.getName());
+            System.out.println("size: " + object.getSize());
+            System.out.println("contentType: " + object.getContentType());
+            System.out.println("updated: " + object.getUpdated());
+            System.out.println("owner: " + object.getOwner());
+            // should only show up if projection is full.
+            // System.out.println("acl: " + object.getAcl());
+        }
+
+        static void separator() {
+            System.out.println();
+            System.out.println("------------------------------------------------------");
+            System.out.println();
+        }
+    }
+
 
 }

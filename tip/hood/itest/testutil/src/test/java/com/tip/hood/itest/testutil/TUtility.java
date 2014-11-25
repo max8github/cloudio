@@ -95,7 +95,7 @@ public final class TUtility {
     *
     * @param bytes bytes to save into a file
     * @param filename string defining the file name (no path). The file will be
-    * saved with taht name under the standard project build directory 'target'.
+    * saved with that name under the standard project build directory 'target'.
     * @throws IOException
     */
    public static void outputToFile(byte[] bytes, String filename) throws IOException {
