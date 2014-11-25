@@ -30,7 +30,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 /**
- *
+ * This test does not work, can delete....
  * @author max
  */
 public class AppNGTest {
