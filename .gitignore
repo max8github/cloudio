@@ -12,6 +12,9 @@ hs_err_pid*
 *.exe
 *.o
 *.so
+target
+dist
+build
 
 # Packages #
 ############
@@ -45,8 +48,8 @@ Icon?
 Thumbs.db
 *~
 
-###
-target
+# IDE-specific
+nb-configuration.xml
 
 
 
