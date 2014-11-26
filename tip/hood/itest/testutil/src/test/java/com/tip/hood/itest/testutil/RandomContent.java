@@ -122,12 +122,12 @@ public class RandomContent {
      *
      * Copied this code from com.google.api.services.samples.storage.cmdline.StorageSample, under Apache 2 license.
      */
-    public static class RandomDataBlockInputStream extends InputStream {
+    public static class DataBlockInputStream extends InputStream {
 
         private long byteCountRemaining;
         private final byte[] buffer;
 
-        public RandomDataBlockInputStream(long size, int blockSize) {
+        public DataBlockInputStream(long size, int blockSize) {
             byteCountRemaining = size;
             final Random random = new Random();
             buffer = new byte[blockSize];

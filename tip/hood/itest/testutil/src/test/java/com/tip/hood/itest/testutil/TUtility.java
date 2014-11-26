@@ -200,7 +200,7 @@ public final class TUtility {
             }
             char[] a = new char[len];
             Arrays.fill(a, 0, len, c);
-            String pattern = Arrays.toString(a);
+            String pattern = new String(a);
 
             System.out.println();
             System.out.println(pattern + name + pattern);
