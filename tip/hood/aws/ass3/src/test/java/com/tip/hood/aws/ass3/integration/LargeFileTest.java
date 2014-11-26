@@ -86,7 +86,7 @@ public class LargeFileTest {
             sigOut.write(digest.digest(buf));
             random.nextBytes(buf);
             current = 0;
-            TUtility.decoratedPrint("Uploading in progress: " + (float)count * 100 / _size + "%. " + count + " " + _size);
+            TUtility.View.decoratedPrint("Uploading in progress: " + (float)count * 100 / _size + "%. " + count + " " + _size);
          }
 
          count++;
@@ -154,17 +154,17 @@ public class LargeFileTest {
       //Create bucket:
       random = new Random(System.currentTimeMillis());
       FIXED_BUCKET_NAME += Math.abs(random.nextLong());
-      TUtility.decoratedPrint("\nvBlob to create bucket" + FIXED_BUCKET_NAME);
+      TUtility.View.decoratedPrint("\nvBlob to create bucket" + FIXED_BUCKET_NAME);
       Bucket bucket = s3Client.createBucket(FIXED_BUCKET_NAME);
       Assert.assertNotNull(bucket);
-      TUtility.decoratedPrint(bucket + " created!");
+      TUtility.View.decoratedPrint(bucket + " created!");
    }
 
    @Test
    public void testPutObject() throws Exception {
-      TUtility.decoratedPrint("vBlob Client doing a put");
+      TUtility.View.decoratedPrint("vBlob Client doing a put");
       objectname = random.nextLong() + ".bin";
-      TUtility.decoratedPrint("objectname = " + objectname);
+      TUtility.View.decoratedPrint("objectname = " + objectname);
       ObjectMetadata objMd = new ObjectMetadata();
       objMd.setContentLength(TOTAL_SIZE);
 
@@ -172,10 +172,10 @@ public class LargeFileTest {
       PutObjectRequest g = new PutObjectRequest(FIXED_BUCKET_NAME, objectname, in, objMd);
       PutObjectResult object = s3Client.putObject(g);
       if (object == null) {
-         TUtility.decoratedPrint("object is null!");
+         TUtility.View.decoratedPrint("object is null!");
       }
       else {
-         TUtility.decoratedPrint(object.toString());
+         TUtility.View.decoratedPrint(object.toString());
       }
       Assert.assertNotNull(object);
    }
@@ -185,11 +185,11 @@ public class LargeFileTest {
     */
    @Test(dependsOnMethods = {"testPutObject"})
    public void testGetObject() throws IOException {
-      TUtility.decoratedPrint("\ntestGetObject");
+      TUtility.View.decoratedPrint("\ntestGetObject");
       GetObjectRequest g = new GetObjectRequest(FIXED_BUCKET_NAME, objectname);
       S3Object object = s3Client.getObject(g);
       Assert.assertNotNull(object);
-      TUtility.decoratedPrint("object = " + object.getKey());
+      TUtility.View.decoratedPrint("object = " + object.getKey());
       S3ObjectInputStream stream = object.getObjectContent();
 
       try (BufferedInputStream sigIn = new BufferedInputStream(new FileInputStream(signature))) {
@@ -211,7 +211,7 @@ public class LargeFileTest {
                Assert.assertEquals(ret, 16);
                digest.reset();
                Assert.assertEquals(digest.digest(buf), sig);
-               TUtility.decoratedPrint("Downloading in progress: " + (float) (++count) * 100 * bufSize / TOTAL_SIZE + "%.");
+               TUtility.View.decoratedPrint("Downloading in progress: " + (float) (++count) * 100 * bufSize / TOTAL_SIZE + "%.");
 
                offset = 0;
                len = bufSize;

@@ -14,10 +14,8 @@ import com.google.api.client.googleapis.media.MediaHttpUploader;
 import com.google.api.client.googleapis.media.MediaHttpUploaderProgressListener;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.InputStreamContent;
-import com.google.api.client.json.GenericJson;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.client.util.Key;
 import com.google.api.client.util.Lists;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.storage.Storage;
@@ -38,7 +36,6 @@ import static java.net.HttpURLConnection.HTTP_CONFLICT;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
-import java.util.Random;
 import java.util.Set;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
@@ -59,6 +56,7 @@ public class StorageSampleNGTest {
     private static String BUCKET_NAME;
     private static JsonFactory jsonFactory;
     private static Storage client;
+    private static final ViewBucket view = new ViewBucket();
 
     public StorageSampleNGTest() {
     }
@@ -113,8 +111,8 @@ public class StorageSampleNGTest {
         Storage.Buckets.Get getBucket = client.buckets().get(BUCKET_NAME);
         getBucket.setProjection("full");
         Bucket bucket = getBucket.execute();
-        View.separator();
-        View.show(bucket);
+        view.lineBreak();
+        view.show(bucket);
     }
 
     /**
@@ -127,7 +125,7 @@ public class StorageSampleNGTest {
         System.out.println("testListObjects");
         Storage.Objects.List listObjects = client.objects().list(BUCKET_NAME);
         com.google.api.services.storage.model.Objects objects;
-        View.header1("objects in bucket, start");
+        view.lineBreak("objects in bucket, start");
         do {
             objects = listObjects.execute();
             List<StorageObject> items = objects.getItems();
@@ -141,14 +139,14 @@ public class StorageSampleNGTest {
 
             listObjects.setPageToken(objects.getNextPageToken());
         } while (null != objects.getNextPageToken());
-        View.separator();
+        view.lineBreak();
     }
 
     @Test
     public void testCreateBucket() throws Exception {
         InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("conf/sample_settings.json");
         SampleSettings settings = SampleSettings.load(jsonFactory, in);
-        View.header1("Trying to create bucket '" + settings.getBucket() + "'");
+        view.lineBreak("Trying to create bucket '" + settings.getBucket() + "'");
         Storage.Buckets.Insert insertBucket = client.buckets()
                 .insert(settings.getProject(), new Bucket().setName(settings.getBucket())
                 //                .setDefaultObjectAcl(ImmutableList.of(
@@ -174,7 +172,7 @@ public class StorageSampleNGTest {
         InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("conf/sample_settings.json");
         SampleSettings settings = SampleSettings.load(jsonFactory, in);
         boolean useCustomMetadata = false;
-        View.header1("Uploading object.");
+        view.lineBreak("Uploading object.");
         File file = TUtility.createTFileWithContent("poem01.txt", RandomContent.createPoem(5));
         InputStreamContent mediaContent = new InputStreamContent("text/plain", new FileInputStream(file));
         // Not strictly necessary, but allows optimization in the cloud.
@@ -279,59 +277,6 @@ public class StorageSampleNGTest {
     }
 
     /**
-     * Generates a random data block and repeats it to provide the stream.
-     *
-     * Using a buffer instead of just filling from java.util.Random because the latter causes noticeable lag in stream
-     * reading, which detracts from upload speed. This class takes all that cost in the constructor.
-     */
-    private static class RandomDataBlockInputStream extends InputStream {
-
-        private long byteCountRemaining;
-        private final byte[] buffer;
-
-        public RandomDataBlockInputStream(long size, int blockSize) {
-            byteCountRemaining = size;
-            final Random random = new Random();
-            buffer = new byte[blockSize];
-            random.nextBytes(buffer);
-        }
-
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.io.InputStream#read()
-         */
-        @Override
-        public int read() {
-            throw new AssertionError("Not implemented; too slow.");
-        }
-
-        /*
-         * (non-Javadoc)
-         *
-         * @see java.io.InputStream#read(byte [], int, int)
-         */
-        @Override
-        public int read(byte b[], int off, int len) {
-            if (b == null) {
-                throw new NullPointerException();
-            } else if (off < 0 || len < 0 || len > b.length - off) {
-                throw new IndexOutOfBoundsException();
-            } else if (len == 0) {
-                return 0;
-            } else if (byteCountRemaining == 0) {
-                return -1;
-            }
-            int actualLen = len > byteCountRemaining ? (int) byteCountRemaining : len;
-            for (int i = off; i < actualLen; i++) {
-                b[i] = buffer[i % buffer.length];
-            }
-            byteCountRemaining -= actualLen;
-            return actualLen;
-        }
-    }
-
-    /**
      * Authorizes the installed application to access user's protected data.
      */
     private static Credential authorize(HttpTransport httpTransport, JsonFactory JSON_FACTORY,
@@ -372,47 +317,15 @@ public class StorageSampleNGTest {
         return new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
     }
 
-    /**
-     * Provides simple command line UI.
-     */
-    public static class View {
+    public static class ViewBucket extends TUtility.View<Bucket> {
 
-        static void header1(String name) {
-            System.out.println();
-            System.out.println("================== " + name + " ==================");
-            System.out.println();
-        }
-
-        static void header2(String name) {
-            System.out.println();
-            System.out.println("~~~~~~~~~~~~~~~~~~ " + name + " ~~~~~~~~~~~~~~~~~~");
-            System.out.println();
-        }
-
-        static void show(Bucket bucket) {
+        @Override
+        public void show(Bucket bucket) {
             System.out.println("name: " + bucket.getName());
             System.out.println("location: " + bucket.getLocation());
             System.out.println("timeCreated: " + bucket.getTimeCreated());
             System.out.println("owner: " + bucket.getOwner());
             System.out.println("acl: " + bucket.getAcl());
         }
-
-        static void show(StorageObject object) {
-            System.out.println("name: " + object.getName());
-            System.out.println("size: " + object.getSize());
-            System.out.println("contentType: " + object.getContentType());
-            System.out.println("updated: " + object.getUpdated());
-            System.out.println("owner: " + object.getOwner());
-            // should only show up if projection is full.
-            // System.out.println("acl: " + object.getAcl());
-        }
-
-        static void separator() {
-            System.out.println();
-            System.out.println("------------------------------------------------------");
-            System.out.println();
-        }
     }
-
-
 }
