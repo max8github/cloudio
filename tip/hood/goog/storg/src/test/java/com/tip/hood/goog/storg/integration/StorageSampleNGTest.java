@@ -86,6 +86,11 @@ public class StorageSampleNGTest {
     public void tearDownMethod() throws Exception {
     }
 
+    /**
+     * Gets bucket by name and prints out the bucket object information.
+     *
+     * @throws Exception
+     */
     @Test
     public void testBucket() throws Exception {
         System.out.println("testBucket");
@@ -125,6 +130,11 @@ public class StorageSampleNGTest {
         view.lineBreak();
     }
 
+    /**
+     * Creates bucket if not already there.
+     *
+     * @throws Exception
+     */
     @Test
     public void testCreateBucket() throws Exception {
         InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("conf/sample_settings.json");
@@ -150,6 +160,11 @@ public class StorageSampleNGTest {
         }
     }
 
+    /**
+     * Creates an text file on the fly and uploads it into the given bucket.
+     *
+     * @throws Exception
+     */
     @Test
     public void testPutObj() throws Exception {
         InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("conf/sample_settings.json");
@@ -161,7 +176,28 @@ public class StorageSampleNGTest {
         // Not strictly necessary, but allows optimization in the cloud.
         mediaContent.setLength(file.length());
 
-        Utils.insert(client, useCustomMetadata, settings, mediaContent);
+        Utils.insert(client, useCustomMetadata, settings, mediaContent, "01");
+    }
+
+    /**
+     * Creates an text file on the fly and uploads it into the given bucket.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testPutManyObj() throws Exception {
+        InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("conf/sample_settings.json");
+        SampleSettings settings = SampleSettings.load(jsonFactory, in);
+        boolean useCustomMetadata = false;
+        view.lineBreak("Uploading objects");
+        for (int i = 0; i < 5; i++) {
+            File file = TUtility.createTFileWithContent("poem0"+i+".txt", RandomContent.createPoem(5));
+            InputStreamContent mediaContent = new InputStreamContent("text/plain", new FileInputStream(file));
+            // Not strictly necessary, but allows optimization in the cloud.
+            mediaContent.setLength(file.length());
+
+            Utils.insert(client, useCustomMetadata, settings, mediaContent, "0"+i);
+        }
     }
 
 }

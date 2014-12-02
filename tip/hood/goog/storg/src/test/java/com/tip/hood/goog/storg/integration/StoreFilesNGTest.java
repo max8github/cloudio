@@ -11,19 +11,18 @@ import com.google.api.services.storage.Storage;
 import com.tip.hood.itest.testutil.RandomContent;
 import com.tip.hood.itest.testutil.TUtility;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.Random;
 import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 /**
  *
- * @author max
  */
 public class StoreFilesNGTest {
 
@@ -86,20 +85,32 @@ public class StoreFilesNGTest {
         Random r = new Random();
         //initial img
         RandomContent.DataBlockInputStream b = new RandomContent.DataBlockInputStream(baseObjectSize, blockSize);
-        TUtility.dumpStream(b, "img0.bin");
         //snaps
         RandomContent.DataBlockInputStream[] s = new RandomContent.DataBlockInputStream[n + 1];
         s[0] = b;
         for (int i = 1; i < n + 1; i++) {
             baseObjectSize = (long) (r.nextInt(4000) * Math.pow(2., 10.));
             s[i] = new RandomContent.DataBlockInputStream(baseObjectSize, blockSize);
-            TUtility.dumpStream(s[i], "img" + i + ".bin");
         }
         return s;
     }
 
-    @AfterMethod
-    public void tearDownMethod() throws Exception {
+    /**
+     *
+     * @param baseObjectSize size in MB of initial image
+     * @param blockSize buffer block size to read
+     * @param n number of snaps
+     * @return the array of base plus snaps (n+1)
+     * @throws IOException
+     */
+    File[] createBinFilesOnDisk(long baseObjectSize, int blockSize, int n)
+            throws IOException {
+        RandomContent.DataBlockInputStream[] s = createImagesOnDisk(baseObjectSize, blockSize, n);
+        File[] dumpStream = new File[s.length];
+        for (int i = 0; i < dumpStream.length; i++) {
+            dumpStream[i] = TUtility.dumpStream(s[i], "img" + i + ".bin");
+        }
+        return dumpStream;
     }
 
     @Test
@@ -111,10 +122,12 @@ public class StoreFilesNGTest {
 
         //create a 10MB file
         long baseObjectSize = (long) (10 * Math.pow(2., 20.));//10 MB
-        RandomContent.DataBlockInputStream[] s = createImagesOnDisk(baseObjectSize, 1024, 10);
-        for (RandomContent.DataBlockInputStream item : s) {
-            InputStreamContent mediaContent = new InputStreamContent("application/octet-stream", item);
-            Utils.insert(client, useCustomMetadata, settings, mediaContent);
+        File[] s = createBinFilesOnDisk(baseObjectSize, 1024, 10);
+        int i = 0;
+        for (File file : s) {
+            InputStreamContent mediaContent = new InputStreamContent("application/octet-stream", new FileInputStream(file));
+            mediaContent.setLength(file.length());
+            Utils.insert(client, useCustomMetadata, settings, mediaContent, "0"+(i++));
         }
     }
 }

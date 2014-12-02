@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.tip.hood.goog.storg.integration;
 
 import com.google.api.client.auth.oauth2.Credential;
@@ -44,7 +39,16 @@ final class Utils {
     private Utils() {
     }
 
-    static void insert(Storage client, boolean useCustomMetadata, SampleSettings settings, InputStreamContent mediaContent) throws IOException {
+    /**
+     * 
+     * @param client
+     * @param useCustomMetadata
+     * @param settings
+     * @param mediaContent
+     * @throws IOException 
+     */
+    static void insert(Storage client, boolean useCustomMetadata, SampleSettings settings, 
+            InputStreamContent mediaContent, String postfix) throws IOException {
         StorageObject objectMetadata = null;
         if (useCustomMetadata) {
             List<ObjectAccessControl> acl = Lists.newArrayList();
@@ -60,7 +64,7 @@ final class Utils {
         }
         Storage.Objects.Insert insertObject = client.objects().insert(settings.getBucket(), objectMetadata, mediaContent);
         if (!useCustomMetadata) {
-            insertObject.setName(settings.getPrefix() + "01");
+            insertObject.setName(settings.getPrefix() + postfix);
         }
         insertObject.getMediaHttpUploader().setProgressListener(new Utils.CustomUploadProgressListener()).setDisableGZipContent(true);
         insertObject.execute();
@@ -68,6 +72,13 @@ final class Utils {
 
     /**
      * Authorizes the installed application to access user's protected data.
+     * 
+     * @param httpTransport
+     * @param JSON_FACTORY
+     * @param dataStoreFactory
+     * @param clientSecretsJsonPath
+     * @return
+     * @throws Exception 
      */
     static Credential authorize(HttpTransport httpTransport, JsonFactory JSON_FACTORY,
             FileDataStoreFactory dataStoreFactory, String clientSecretsJsonPath) throws Exception {

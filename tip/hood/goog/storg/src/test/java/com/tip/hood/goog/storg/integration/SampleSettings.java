@@ -13,6 +13,7 @@ import java.io.InputStream;
 
 /**
  * Samples settings JSON Model.
+ * Got this class as is from sample google code tutorial.
  */
 public final class SampleSettings extends GenericJson {
     @Key(value = "project")
