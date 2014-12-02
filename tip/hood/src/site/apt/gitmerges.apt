@@ -1,0 +1,70 @@
+                         ----------------------------------
+                              Set up Instructions
+                         ----------------------------------
+                               Massimo Calderoni
+                              -------------------
+                                 2013-11-08
+                              -------------------
+
+ <<Contents>>
+
+=====================
+
+%{toc}
+
+=====================
+
+
+Git Rebase and Merge
+
+ The rule is simple: you should never merge. Merging causes Git to create a DAG,
+while we want a linear history of commits instead. In order to have that, never use
+<<<git merge>>> nor <<<git pull>>>, because <<<git pull>>> will also merge.
+
+ Here is the typical workflow that you have to follow:
+
++----------------
+git checkout master
+git checkout -b mybranch
++----------------
+ creates your personal local branch off of master.\
+Now make your local changes, do <<<git add>>>, do whatever you need, and commit:
+
++----------------
+git commit -m "my changes"
++----------------
+ In the meantime say someone has changed master and pushed.\
+Now you have a different
+master from the one you started off of, so, before pushing you must combine
+your changes with the ones coming at you
+
++----------------
+git checkout master
+git pull
++----------------
+ you can do <<<git pull>>> here because you have not committed anything to master:
+this is safe to do only in this case. If you committed to master and you
+pull, then it will merge, because <<<git pull>>> = <<<git fetch>>> + <<<git merge>>>.\
+So, a good rule in general, is: never do anything on master. Do every change in
+another local branch, leave master intact.\
+So, now go back to your <<<mybranch>>> and <<rebase>>:
+
++----------------
+git checkout mybranch
+git rebase master
++----------------
+ If there are conflicts, resolve them, do git add, whatever needs to be done,
+<<<git rebase --continue>>>.\
+Now your branch is on top of master again, and if you are ready to push, you do:
+
++----------------
+git checkout master
+git rebase mybranch
+   #now master is like mybranch
+git push
++----------------
+
+
+References
+
+ * {{{http://pcottle.github.io/learnGitBranching/?demo}Git tutorial}}

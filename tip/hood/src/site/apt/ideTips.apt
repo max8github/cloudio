@@ -1,0 +1,30 @@
+                         ----------------------------------
+                              Set up Instructions
+                         ----------------------------------
+                               Massimo Calderoni
+                              -------------------
+                                 2013-10-25
+                              -------------------
+
+ <<Contents>>
+
+=====================
+
+%{toc}
+
+=====================
+
+Overview
+
+ This section is meant to contain tips on IDE use.
+
+NetBeans
+
+* Running Jetty
+
+  To run your war project with jetty clicking the usual Debug or Run main button,
+you have to first change the action for your war project. See image below on how
+set the Debug action after right-clicking on your project and clicking on menu
+Properties:
+
+[images/NBProps.png] NetBeans Project Properties

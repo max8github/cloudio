@@ -111,7 +111,7 @@ public class MachineGunNGTest {
 
    @Test
    public void testPutObject() throws IOException {
-      System.out.println("\nvBlob Client doing a put");
+      System.out.println("\nClient doing a put");
       objectname = random.nextLong() + "/image.jpg";
       System.out.println("objectname = " + objectname);
       File f = new File(TUtility.assertAndReturnCanonicalPath(

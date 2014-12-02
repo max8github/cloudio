@@ -1,0 +1,48 @@
+                         ----------------------------------
+                              Set up Instructions
+                         ----------------------------------
+                               Max Calderoni
+                              -------------------
+                                 2013-10-08
+                              -------------------
+
+ <<Contents>>
+
+=====================
+
+%{toc}
+
+=====================
+
+
+
+System Requirements
+
+ In order to run hood, you need to have the backing storage already up.\
+ These instructions assume you already have 1) a ring
+available to you and, optionally, 2) have installed HAproxy, if you wanted to test with HAproxy.\
+Instructions on how to install and run with those can be found by googling.
+
+ * <<Data Server>>
+
+
+* Set up and Build
+
+ Please follow instructions {{{./setup.html}here}}.
+
+Run hood
+
+ Build all sources first (for git sources, see {{{./setup.html}here}}).\
+ Look for convenience class <<<hoodStarterTest>>>, and run that class as a test
+from the IDE.\
+ That will launch the necessary servers for hood to work.
+
+ To run one server by one manually, or to first install from rpm and run,
+please see the <<EXAMPLE FOR DATASERVER>> here:
+{{{./hood/dataserver/embeddedJetty.html}RUN DATASERVER}}.\
+ For all other servers instructions are similar.
+
+
+
+
+

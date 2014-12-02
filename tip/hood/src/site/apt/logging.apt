@@ -1,0 +1,163 @@
+                         ----------------------------------
+                                    Logging
+                         ----------------------------------
+                                 Max Calderoni
+                              -------------------
+                                 2014-12-01
+                              -------------------
+
+ <<Contents>>
+
+=====================
+
+%{toc}
+
+=====================
+
+Logging requirements
+
+ Logs are an important tool for debugging. Here are some of the reasons why logs are important and why they should be incorporated in your code:
+
+  * For debugging
+
+  * To detect anomalies in the system
+
+  * To flag events
+
+  * To track transactions
+
+  * To record performance
+
+ These are some of the requirements based on which the logging strategy was selected:
+
+ * Configuration should exist outside of code - in a configuration file
+
+ * Fairly easy configuration
+
+ * Should provide various policies to handle logs. Policies refer to logging filters, being able to write to files or console.
+
+ * Should be able to write to syslog
+
+ Based on the above requirements, we decided to go with the {{{www.slf4j.org}SLF4J}} logging interface, with {{{http://logback.qos.ch/}Logback}} as the log implementor.
+
+
+Developer guidelines for incorporating logging
+
+ Please follow these guidelines when writing logging statements in your code
+
+ [[2]] Only use SLF4J for logging
+
+ [[3]] In your Java class, create an (SLF4J) logger as follows:
+
++-----
+ private static final Logger logger = LoggerFactory.getLogger(DataTransferListener.class);
++-----
+
+ The class should only have one logger defined and used
+
+ [[4]] Add a log message as follows:
+
++-----
+ logger.info("This is an info message");
+ logger.debug("This is a debug message");
+ logger.info("This is a message with a parameter {}. Note the curly braces!", parameter);
+ logger.info("This is a message with many parameters {}, {}, {}, {}.", p1, p2, p3, p4);
+ logger.info("This is a message with many {}, {}, {}, and exception: .", p1, p2, p3, exception);
+ logger.info("Do not use formatter such as %s. It is inefficient and results in performance overheads", parameter);
+ logger.info("Do not use this kind of formatting" + parameter + "This results in performance overheads");
++-----
+
+ Logs can be informative or used to track errors. Use <<info>> or <<debug>> levels for informative logs. Error logs should be captured at
+ either <<warn>> or <<error>> levels. <<All errors should be logged.>>
+
+ The following are some guidelines for using the correct logging levels
+
+  * <<trace>> This is the lowest level of logging. You should avoid using this level of logging
+
+  * <<debug>> This is useful to capture extra information such as input parameters, result codes, function entry and exit information. Debug level and lower affects the performance of the application. Hence they should only be used to capture information from the debugging context.
+
+  * <<info>> This is the common level of logging. Be careful not to write too much information at this level. Be wary of using info level logs in loops or blocks of code which are invoked frequently. Keep in mind that logging results in loss of performance in your application. Use this log level to provide a "storyline".
+
+  * <<warn>> Use this level to log recoverable errors, unexpected state/path transitions and suspicious values
+
+  * <<error>> Use this to indicate unrecoverable events. Error logs are usually accompanied with a stack trace.
+
+ Make your logs informative by providing appropriate context. In the following example, the first log message does not provide much value.
+
++-----
+ logger.info("Created bucket");
+ logger.info("Created bucket {}.", bucketname);
++-----
+
+ When logging exceptions, make sure you provide the exception object to the logger. In the following example, the first log message is incorrect.
+
++----
+ logger.warn("Hit exception when creating a bucket. {}", ex.getMessage());
+ logger.warn("Hit exception when creating a bucket", ex);
++----
+
+ Where possible, use <<key=value>> notation. This is useful when using tools like LogInsight. For example, the first logging statement is a KV representation of the second statement
+
++-----
+ logger.info("Created bucket. bucketname={}", bucketname);
+ logger.info("Created bucket {}", bucketname);
++-----
+
+ <<Do not split a log over multiple log statements>>. This becomes a problem when aggregating logs from multiple systems.
+
+ [[5]] The final log output has a lot more details.
+
+ If your log statement is
+
++-----
+ logger.info("HeadObjectWorkflow finished with HTTP status 200");
++-----
+
+ your log output will be as follows
+
++-----
+ 15:13:48.494 [HttpClient@2003499983-35][1B687AE4141BD0AB] INFO  c.v.pensie.hood.common.Workflow - HeadObjectWorkflow finished with HTTP status 200
++-----
+
+ This is because an external log format is applied to the log message. Note that the above log output has details such as time and log level. This information is added by SLF4J and should not be added in your log message. Use {{{http://logback.qos.ch/manual/mdc.html}MDC}} to log information which should be printed with every log. For example, the request ID should be printed with every log. For this, we use MDC.
+
+
+Good practices
+
+* Events
+
+ Events such as starting or stopping a service should be logged. A service may have multiple bootstrapping routines leading to a complete startup. Having logs to track these steps makes it easy to debug when the service fails to startup and serve requests.
+
+ Failure and success responses are also types of events. Logging these events will make it easier to identify faulty components.
+
+* Transactions
+
+ hood being a distributed setup, it is important to be able to trace transactions across various components. By printing out transaction identifiers it becomes easy to track a transaction from beginning to end.
+
+
+* Consistency
+
+ Follow a consistent pattern when logging. This becomes useful when log scraping.
+
+
+Redirecting logs to syslog
+
+ Enable the following section in <<</etc/rsyslog.conf>>> and restart <<<rsyslogd>>>
+
++----
+ # Provides UDP syslog reception
+ $ModLoad imudp
+ $UDPServerRun 514
++----
+
+References and links
+
+ * {{{http://www.slf4j.org/}SLF4J}}
+
+ * {{{http://logback.qos.ch/}Logback}}
+
+ * {{{http://dev.splunk.com/view/logging-best-practices/SP-CAAADP6}Splunk: Best practices}}
+
+ * {{{https://community.loggly.com/customer/portal/articles/1189777-json-best-practices-for-logging}Loggly: Best practices}}
+
+

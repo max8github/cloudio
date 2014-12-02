@@ -1,0 +1,142 @@
+                         ----------------------------------
+                              Set up Instructions
+                         ----------------------------------
+                               Massimo Calderoni
+                              -------------------
+                                 2013-11-08
+                              -------------------
+
+ <<Contents>>
+
+=====================
+
+%{toc}
+
+=====================
+
+
+Git Remote Branches
+
+ You must use a naming convention for remote branches: they have to start with
+the word <topic> and then slash and then <your login name>:
+
++----------------
+topic/yourname
+topic/yourname/myb
+topic/yourname/whatever
++----------------
+
+* Create a Remote Branch
+
+ In order to <<create>> from scratch remote branch <<origin/topic/yourname/remotebranch>>
+tracked by a local branch with name <<localbranch>>, you do:
+
++----------------
+git branch localbranch   (or: git checkout -b localbranch)
+git push origin localbranch:topic/yourname/remotebranch
++----------------
+
+* Delete a Remote Branch
+
+ To <<delete>> a remote branch, you do:
+
++----------------
+git push origin :topic/yourname/remotebranch
++----------------
+
+* Check out a Remote Branch
+
+ For tracking a previously created remote branch from another computer with, say,
+local branch <<otherlocalbranch>>:
+
++----------------
+git branch --track otherlocalbranch origin/topic/yourname/remotebranch
++----------------
+ which creates local branch <<otherlocalbranch>> for you, tracking
+<<origin/topic/yourname/remotebranch>>.\
+The above is equivalent to:
+
++----------------
+git checkout -b otherlocalbranch origin/topic/yourname/remotebranch
++----------------
+ except that this one will check out branch <<otherlocalbranch>> directly (you are
+now in that branch already without doing <<<git checkout otherlocalbranch>>>).
+
+* Worflow with Branches
+
+ After having created your remote branch and its local counterpart, here are the
+typical operations:
+
+ * In <computer 1>, make changes in local and commit changes
+
+ * when ready, push your changes
+
+ * you then pull your changes from <computer 2>
+
+ * in the meantime master will change, and before pushing to master you rebase
+
+[]
+
+ Commands are the usual ones for pushing and rebasing:
+
++----------------
+git checkout master
+git pull
+git checkout localbranch
+git rebase master
++----------------
+
+ * For pushing to a remote branch that has a different name from its local counterpart,
+you must specify its local name with colon (see below).
+
+ * For 'rebasing' with master, you have to force the rebase. Git will not allow it
+without forcing, as the operation might cause losing history.
+In our case we do not care about losing history, because we care more about
+being linear with master. Careful, however, because you can possibly lose
+commits this way.
+
+* Push to Remote Branch
+
+ Here is how you push commits from your local <<localbranch>> to its remote
+counterpart <<topic/yourname/remotebranch>> (the following will work if you have not
+rebased):
+
++----------------
+git push origin localbranch:topic/yourname/remotebranch
++----------------
+
+* Rebase Remote Branch with Master
+
+ To rebase with master from <<localbranch>>, you do the usual, <<git rebase master>>.
+Nothing new here: after resolving conflicts, <<localbranch>> will be on top of master.
+ But then you want to push <<localbranch>> to your remote private branch
+<<topic/yourname/remotebranch>> while willing to be linear with master, that is, no
+merges. So for that, you have to <force> the command seen above for push:
+
++----------------
+git push origin localbranch:topic/yourname/remotebranch --force
++----------------
+
+ As an alternative linear rebase workflow, after successfully rebasing with
+master and pushing to master, from master you can:
+
+ [[1]] delete your remote private branch and your local private branch
+
+ [[2]] create both again as specified above
+
+[]
+
+ That's a trivial way to get your remote branch to appear on top of origin/master.
+
+* List Branches
+
+ To list branches showing what they are tracking, do:
+
++----------------
+git branch -vv
++----------------
+
+
+References
+
+ * {{{http://git-scm.com/book/en/Git-Branching-Remote-Branches}Git-Branching-Remote-Branches}}

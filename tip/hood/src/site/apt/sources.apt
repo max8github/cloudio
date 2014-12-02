@@ -1,0 +1,62 @@
+                         ----------------------------------
+                              Dev Instructions
+                         ----------------------------------
+                               Massimo Calderoni
+                              -------------------
+                                 2014-12-01
+                              -------------------
+
+ <<Contents>>
+
+=====================
+
+%{toc}
+
+=====================
+
+ Might help if you first read the {{{./setup.html}Set up Instructions}}.\
+For troubleshooting on installation, deployment, please see
+{{{./setup.html#Troubleshooting}Troubleshooting}} at the bottom of the
+Set up Instructions page.
+
+Sources
+
+ Get the sources from Git:
+
++-----------------------------------------------------------------------------
+git clone https://github.com/max8github/cloudio.git
++-----------------------------------------------------------------------------
+
+
+
+Build
+
+ After following the {{{./setup.html}Set up Instructions}}, in order to build, do:
+
++----------------------------------------------------------------------------
+cd cloudio/tip/hood
+mvn clean install
++----------------------------------------------------------------------------
+
+
+* NOTE
+
+** Quick Build
+
+ If you are not concerned about integration tests, and simply want to compile, you can skip the
+{{{./setup.html}setup part}} about <<<settings.xml>>>.\
+ In order to build, just make sure you have the correct system requirement with Java and Maven,
+and do:
+
++----------------------------------------------------------------------------
+cd cloudio/tip/hood
+mvn -s settings.xml
++----------------------------------------------------------------------------
+ That will work because we include a convenient <<<settings.xml>>> under <<<cloudio>>> as a template,
+but can also work for building (but mind that you might not be able to get too far with
+that when it comes to integ testing).
+
+Tests
+
+ For tests, integration tests and QE tests, please read {{{./integrationtests.html}here}}
+

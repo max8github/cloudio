@@ -1,0 +1,129 @@
+                         ----------------------------------
+                              Integration Tests Instructions
+                         ----------------------------------
+                               Massimo Calderoni
+                              -------------------
+                                 2014-02-12
+                              -------------------
+
+
+ <<Contents>>
+
+=====================
+
+%{toc}
+
+=====================
+
+
+Dev Integration Tests
+
+ In dev, we have <2 types> of integration tests:
+
+ [[1]] regression
+
+ [[2]] experimental
+
+ The first one is the kind of test we want to pass before committing new code.\
+ The second one is used to experiment things while developing: part of this
+work might eventually be promoted to 'regression', when cleaned up and ready.
+
+* Set up
+
+ Please note that for build performance reasons, integration tests <are not>
+run in the build, only <unit tests> are.
+
+ To mark a test as an <integration> test, you need to place your test class under a
+package in which at least one folder is named "integration". Examples:
+
++----------------------------------------------------------------------------
+com.tip.hood.goog.integration
+com.tip.hood.goog.somedirectoryname.integration
+com.tip.hood.goog.integration.mytests
++----------------------------------------------------------------------------
+
+* Run Regression Tests
+
+ To run <<regression tests>>, you must first build hood, and then do:
+
++----------------------------------------------------------------------------
+cd hood/itest/regression
+mvn -P integration-test verify
++----------------------------------------------------------------------------
+ The last command runs them all.\
+ You can also run the same tests one by one as you do for experimental tests
+(described below).
+
+* Run Experimental Tests
+
+ As described earlier, in order to run integration tests, you have to issue an explicit command, as
+integration tests do not run with <<<mvn install>>> or <<<mvn test>>> (unit tests do).
+
+ To run all of the integration tests in a module, you do (*see Note 1):
+
++----------------------------------------------------------------------------
+cd mymodule
+mvn integration-test -P integration-test
++----------------------------------------------------------------------------
+ but please note that you would normally not run them all, as experimental
+tests are supposed to be run 'manually' (meaning, there is a little automation
+in those when it comes to set up, tear down, etc).
+ You would normally run experimental tests selectively from your IDE or by
+using a command like:
+
++----------------------------------------------------------------------------
+cd hoodsrc/itest/regression
+mvn -Dtest=com.tip.hood.goog.itest.regression.integration.S3IntegrationTest surefire:test
+mvn -Dtest=com.tip.hood.goog.itest.regression.integration.IntegrationTest surefire:test
+...
++----------------------------------------------------------------------------
+
+ Note 1:  As you can see, we use profiles in Maven in order to achieve separation between
+test categories (this is not the only way: you can also use the
+{{{http://maven.apache.org/surefire/maven-failsafe-plugin/}failsafe plugin}} and
+{{{http://maven.apache.org/plugins/maven-invoker-plugin/index.html}invoker}}).\
+ To see how that is done, see the sections in our main pom delimited by comments
+containing the word <integration tests>.
+
+ Note 2: Please note that eventually we might have more automation, but for full automation over integ
+tests, you should probably refer to the work the QE does.\
+ These integration tests are meant to be for <development>, for trying out/experimenting
+things, and have a very basic regression catching.
+
+ <<Note 3>>: Apart from the obvious (testing in unit and not the entire pieces of functionality),
+the difference between integration and <<unit tests>> is that unit tests are required
+to <<run quickly>>, in-memory, and they do not rely on hard-coded paths or file
+systems or network connections.\
+ Anything that runs slowly, you should place under "integration" even though is
+not. Everything that depends on separate machines, network connections or
+external processes should be marked as integration.
+
+
+QE Integration Tests
+
+ To get the sources:
+
++----------------------------------------------------------------------------
+git clone https://github.com/max8github/cloudio.git
++----------------------------------------------------------------------------
+
+ To build:
+
++----------------------------------------------------------------------------
+cd hood
+mvn
++----------------------------------------------------------------------------
+
+ To run QE integ smoke tests, you first need to launch hood (must be running)
+and then:
+
++----------------------------------------------------------------------------
+cd hood/test
+mvn -P integration-test integration-test
++----------------------------------------------------------------------------
+ or run any test class from the IDE.
+
+ <<TIP>>: in order to quickly pull up hood from the IDE, just run test class
+<<<hoodStarter>>>: it will run for a while. It is just a convenience class
+for quickly launching hood like you would do if you had to run it from an
+installation manually.

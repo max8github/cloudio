@@ -1,0 +1,32 @@
+                         ----------------------------------
+                                 Functional specs
+                         ----------------------------------
+                                 Max Calderoni
+                              -------------------
+                                 2014-12-02
+                              -------------------
+
+ <<Contents>>
+
+=====================
+
+%{toc}
+
+=====================
+
+General documents
+
+ * {{{https://cloud.google.com/compute/docs/} Google Cloud }}
+ * {{{http://aws.amazon.com/documentation/s3/} Amazon S3 }}
+ * {{{./docs/NexusBook.pdf} Nexus }}
+
+
+
+Design documents
+
+
+
+Functional specs
+
+
+

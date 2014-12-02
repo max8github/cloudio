@@ -1,0 +1,167 @@
+                         ----------------------------------
+                                Configuration
+                         ----------------------------------
+                               Massimo Calderoni
+                              -------------------
+                                 2014-03-18
+                              -------------------
+
+ <<Contents>>
+
+=====================
+
+%{toc}
+
+=====================
+
+Design Document for Configuration
+
+ This page describes the rationale and the design behind configuration.\
+ For a more practical guide on configuring or installing or running hood, see {{{./run.html}here}}, for
+{{{./run.html}Run Instructions}} or {{{./hood/aws/embeddedJetty.html}here}} for {{{./hood/aws/embeddedJetty.html} Run Instructions}}.
+
+Prerequisites
+
+ What you need to know:
+
+ * Maven: how resource files are used in tests, how filtering works -> settings.xml etc., and plugins like
+{{{https://maven.apache.org/plugins/maven-assembly-plugin/}maven-assembly-plugin}},
+{{{https://maven.apache.org/plugins/maven-install-plugin}maven-install-plugin}},
+{{{https://maven.apache.org/plugins/maven-jar-plugin}maven-jar-plugin}},
+{{{https://maven.apache.org/plugins/maven-rpm-plugin}maven-rpm-plugin}}.
+
+ * Puppit
+
+ * RPM
+
+Paradigms
+
+ Three main paradigms:
+
+ [[1]] <<do not hard-code>> values like paths or IP or port numbers in code nor in any sources
+
+ [[2]] configuration should <<not depend>> on <<deployment>> scenario.
+
+ [[3]] <<separation>> of responsibilities. Code should not should not try figure out where configuration is.
+Should not have logic other than load by name (+validation). It is the responsibility
+of the deployer to provide correct configuration in the correct location for code to run correctly.
+ All code needs to know is a "name" of a file containing configuration.
+
+[]
+
+ The first point is important, because otherwise you cannot configure things easily.\
+ The second aims to be consistent in configuring a runtime regardless of how the runtime took place.
+ There are different scenarios for a given runtime: 1) <<integration tests>>, 2) <<real production deployment rpm>>,
+3) <<unit tests>>, 4) <<IDE>>.
+
+ Among all scenarios there has to be a way to communicate among teams what the configuration is.\
+ The question to answer is: how do you capture the entire configuration of the system when
+you need to communicate it or identify it for trouble-shooting reasons, fine-tuning or debugging?
+
+ So, requirements are mainly:
+
+ * There should be a <<consistent way of injecting configuration>>. Without that, we will not have control
+over configuration in all deployments. Because code is oblivious on how configuration is passed to it,
+it should have only one way to load configuration (typically classpath or args to main, we choose classpath).
+
+ * Configuration should be the most <<clueless for deployers>>: all they should know is <<what to add>> (database of params)
+and <<how>>. For that, having a unique database of configuration parameters helps.
+
+ * There should be one identifiable store of configuration.
+
+
+
+Implementation
+
+ Here is how this is all done currently in the different scenarios.
+
+* Unit Tests and Integration Tests
+
+ The build system injects variables using <<tokens>>. Maven does this by looking at <<settings.xml>>, which represents
+the database for all configuration items that should not be hard-coded within the build. File settings.xml in the end
+represents a key-value store of configuration parameters.
+When Maven runs and finds a file containing tokens to be resolved, gets the key out of the token, fetches the
+corresponding value in the settings.xml store, creates a resolved copy of the original file and places it in
+directory <<<target>>>.
+
+* Real Deployment
+
+ After installing the rpm and before starting the system, the deployer needs to perform the same resolution process
+described above.
+
+ The deployer must first have available a full map of required parameter keys and parameter values. Typically it is the
+deployer that will fill the correct values in the map, based on specifications.\
+ Then, the deployer needs to substitute with that map all tokens present in any file under /etc/hood.
+
+ The deployer does not need to know what files need what and where. The deployer must have the correct
+configuration map and a way to inject it (for example by using sed and awk or an Ant script).
+
+* IDE
+
+ The IDE just needs to be Maven-aware (sources, classpath, resources, etc), and all will fall into place.
+
+* Notes
+
+ A flat map of configuration parameters might sound limiting, and in certain cases it is. In our project however, we
+find that we do not need much more than a map.\
+ Please note that this has nothing to do with object containment. Configuration objects are more generally hierarchical
+or simply just interconnected like any other object.
+
+List of all configuration parameters
+
+ To ease the work of the deployer in doing the resolution process, a file called <<configdb.properties>> can
+be generated automatically on demand off of <<<hood>>> (root of source tree).
+
+ The file, once generated, contains all hood configuration parameters that the deployer needs and examples
+of values. It is a key-value store of all parameters.\
+ The deployer would first inspect this file, correct the values with the desired ones, and then
+use it as a database to recursively substitute all tokens in directory
+<<</etc/hood>>>, where all hood configuration files are.
+
+ The values present in the file generated off of our source tree are the ones used in development.
+Those values are present to give an example of possible values, not necessarily for being used in a real deployment.
+If the deployer does not know how to choose a parameter, the deployer should consult hood's documentation or
+inquire with a developer.
+
+~~* Configdb
+~~
+~~ To generate do:
+~~
+~~+---------------------------------------------------------------------------
+~~cd cloudio/hood
+~~mvn com.tip.hood.goog:configdb-maven-plugin:configdb
+~~+---------------------------------------------------------------------------
+ You can also specify to the above command options such as:
+
+~~+---------------------------------------------------------------------------
+~~ -Dsettings=settings.xml -DoutputDirectory=myout -Dpom=pom.xml -Dfile=mydb.properties
+~~+---------------------------------------------------------------------------
+~~ in which case the plugin will pick a different settings.xml, a different output directory
+~~where to save the db file or a different name for the db file.\
+~~ By default the plugin picks <<<~/.m2/settings.xml>>>, the <<<pom.xml>>> file of the top project, the <<<target>>>
+~~directory and <<<configdb.properties>>> for the file name.
+
+
+~~* Configdb Maven Plugin (maintenance)
+
+~~ The code that when run generates file <<<configdb.properties>>> off of our source tree resides in our plugin
+~~<<com.tip.hood.goog:configdb-maven-plugin:configdb>>.
+~~ Its sources are located under hood's source tree <<<hood/configdb-maven-plugin>>>, but they have to be compiled
+~~separately from hood and also deployed into our Repository Manager.
+
+~~ Please note that by simply making changes to this code and then building hood, changes will have <<no effect>>:
+~~<<com.tip.hood.goog:configdb-maven-plugin:configdb>> will not compile. To compile it, you have to:
+
+~~+-----------------------------------------------------------
+~~cd hood/configdb-maven-plugin
+~~mvn install
+~~+-----------------------------------------------------------
+~~ Also, in order for the plugin to be downloadable, it must be first deployed into our Repository Manager.
+~~ An admin having deployment credentials can do so by issuing:
+
+~~+-----------------------------------------------------------
+~~cd hood/configdb-maven-plugin
+~~mvn deploy
+~~+-----------------------------------------------------------
+
+~~ For more details, see literature on Maven Plugin Development.

@@ -16,7 +16,42 @@
         <!-- Configuration for unit/integration tests section 1 of 3 (properties) ENDS HERE.-->
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
     </properties>
-    
+
+    <distributionManagement>
+        <site>
+            <id>websiteserver</id>
+            <url>scp://c.storage.googleapis.com:/home/nexus/public_html/hood</url>
+        </site>
+        <repository>
+            <id>repoman</id>
+            <name>Hosted Repository Manager</name>
+            <url>http://c.storage.googleapis.com:8081/nexus/content/repositories/cloudio/</url>
+        </repository>
+    </distributionManagement>
+   
+    <profiles>
+        <!--
+        Configuration for unit/integration tests section 3 of 3 (profiles) STARTS HERE.
+        Use the following profile to run Integration tests. From the command line:
+        mvn clean install -P integration-test
+        or:
+        mvn integration-test -P integration-test
+        * Note that if you do: 'mvn test -P integration-test'
+        integration tests will not run, because the test phase is before the
+        integration phase in the default maven lifecycle.
+        * Also note that unit tests will also be run when integration tests are
+        run, because the integration-test phase is always after the test phase
+        in the default Maven lifecycle.
+        See also: surefire plugin section and properties section.
+        -->
+        <profile>
+            <id>integration-test</id>
+            <properties>
+                <SKIP_INTEGRATION_TESTS>false</SKIP_INTEGRATION_TESTS>
+            </properties>
+        </profile>
+        <!-- Configuration for unit/integration tests section 3 of 3 (profiles) ENDS HERE.-->
+    </profiles>    
 
     <build>
         <defaultGoal>clean install</defaultGoal>
@@ -83,19 +118,142 @@
                                 <requireJavaVersion>
                                     <version>1.7</version>
                                 </requireJavaVersion>
+                                <requireProperty>
+                                    <property>serviceAccountEmail</property>
+                                    <message>
+                                        *********** Property serviceAccountEmail is required for integration tests. ***********
+                                    </message>
+                                </requireProperty>
+                                <requireProperty>
+                                    <property>project</property>
+                                    <message>
+                                        *********** Property project is required for integration tests.  ***********
+                                    </message>
+                                </requireProperty>
+                                <requireProperty>
+                                    <property>bucketName</property>
+                                    <message>
+                                        *********** Property bucketName is required for integration tests.  ***********
+                                    </message>
+                                </requireProperty>
+                                <requireProperty>
+                                    <property>applicationName</property>
+                                    <message>
+                                        *********** Property applicationName is required for integration tests.  ***********
+                                    </message>
+                                </requireProperty>
+                                <requireProperty>
+                                    <property>keysFilePath</property>
+                                    <message>
+                                        *********** Property keysFilePath is required for integration tests.  ***********
+                                    </message>
+                                </requireProperty>
+                                <requireProperty>
+                                    <property>clientSecretsJsonPath</property>
+                                    <message>
+                                        *********** Property clientSecretsJsonPath is required for integration tests.  ***********
+                                    </message>
+                                </requireProperty>
+                                <requireProperty>
+                                    <property>dataStoreDir</property>
+                                    <message>
+                                        *********** Property dataStoreDir is required for integration tests.  ***********
+                                    </message>
+                                </requireProperty>
                             </rules>
                             <fail>true</fail>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pdf-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>pdf</id>
+                        <phase>site</phase>
+                        <goals>
+                            <goal>pdf</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.reporting.outputDirectory}</outputDirectory>
+                            <includeReports>false</includeReports>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-site-plugin</artifactId>
+                <configuration>
+                    <locales>en</locales>
+                    <!--               <reportPlugins>
+                       <plugin>
+                          <groupId>org.apache.maven.plugins</groupId>
+                          <artifactId>maven-project-info-reports-plugin</artifactId>
+                          <version>2.4</version>
+                          <reportSets>
+                             <reportSet>
+                                <reports>
+                                   <report>project-team</report>
+                                   <report>mailing-list</report>
+                                   <report>scm</report>
+                                </reports>
+                             </reportSet>
+                          </reportSets>
+                       </plugin>
+                    </reportPlugins>-->
+                </configuration>
+            </plugin>
+            <!--
+            The configdb plugin generates one file off of the main pom and settings.xml
+            containing the entire list of configuration parameters used in hood
+            Please see description in the sources (and javadoc) of configdb-maven-plugin for more details.
+            -->
+            <!--
+            Disabled configdb plugin as it could get into the way of building for newcomers.
+            Note that you first need to
+            deploy the plugin in the available Repository Manager before being able to run it within the build.
+            For that, i am disabling this plugin from the build. It can be run anyway from the command line without being
+            bound to the build, when available for download from the Repository Manager in use.
+            (mcalderoni, April 2014).
+            <plugin>
+               <groupId>com.cloudio.tip</groupId>
+               <artifactId>configdb-maven-plugin</artifactId>
+               <version>0.3.12</version>
+               <executions>
+                  <execution>
+                     <goals>
+                        <goal>configdb</goal>
+                     </goals>
+                  </execution>
+               </executions>
+            </plugin>
+            -->
+
         </plugins>
         <pluginManagement>
             <plugins>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <version>2.5.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <version>2.4</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-clean-plugin</artifactId>
                     <version>2.5</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.enunciate</groupId>
+                    <artifactId>maven-enunciate-plugin</artifactId>
+                    <version>1.26.2</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -226,15 +384,12 @@
             </plugins>
         </pluginManagement>
     </build>
-    
-    <!--all submodules will have this dependency-->
-    <dependencies>
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
+
+    <modules>
+        <module>aws</module>
+        <module>itest</module>
+        <module>goog</module>
+    </modules>
     
     <dependencyManagement>
         <dependencies>
@@ -658,35 +813,28 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-   
-    <profiles>
-        <!--
-        Configuration for unit/integration tests section 3 of 3 (profiles) STARTS HERE.
-        Use the following profile to run Integration tests. From the command line:
-        mvn clean install -P integration-test
-        or:
-        mvn integration-test -P integration-test
-        * Note that if you do: 'mvn test -P integration-test'
-        integration tests will not run, because the test phase is before the
-        integration phase in the default maven lifecycle.
-        * Also note that unit tests will also be run when integration tests are
-        run, because the integration-test phase is always after the test phase
-        in the default Maven lifecycle.
-        See also: surefire plugin section and properties section.
-        -->
-        <profile>
-            <id>integration-test</id>
-            <properties>
-                <SKIP_INTEGRATION_TESTS>false</SKIP_INTEGRATION_TESTS>
-            </properties>
-        </profile>
-        <!-- Configuration for unit/integration tests section 3 of 3 (profiles) ENDS HERE.-->
-    </profiles>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.9.1</version>
+                <configuration>
+                    <links>
+                        <link>http://docs.oracle.com/javase/7/docs/api/</link>
+                    </links>
+                </configuration>
+            </plugin>
+        </plugins>
+    </reporting>
     
-    <modules>
-        <module>aws</module>
-        <module>itest</module>
-        <module>goog</module>
-    </modules>
+    <!--all submodules will have this dependency-->
+    <dependencies>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
 </project>

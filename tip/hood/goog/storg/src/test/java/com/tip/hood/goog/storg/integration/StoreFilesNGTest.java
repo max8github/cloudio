@@ -26,7 +26,6 @@ import org.testng.annotations.Test;
  */
 public class StoreFilesNGTest {
 
-    private static String BUCKET_NAME;
     private static JsonFactory jsonFactory;
     private static Storage client;
     private static final Utils.ViewBucket view = new Utils.ViewBucket();
@@ -43,7 +42,6 @@ public class StoreFilesNGTest {
             p.load(in);
         }
         File dataStoreDir = new File(p.getProperty("dataStoreDir"));//directory containing file StoredCredential
-        BUCKET_NAME = p.getProperty("bucketName");
         String applicationName = p.getProperty("applicationName");
         String clientSecretsJsonPath = p.getProperty("clientSecretsJsonPath");
         TUtility.assertFileExists(clientSecretsJsonPath);
@@ -126,7 +124,7 @@ public class StoreFilesNGTest {
         int i = 0;
         for (File file : s) {
             InputStreamContent mediaContent = new InputStreamContent("application/octet-stream", new FileInputStream(file));
-            mediaContent.setLength(file.length());
+            mediaContent.setLength(file.length());//for some reason, if i don't set this, this code will not upload.
             Utils.insert(client, useCustomMetadata, settings, mediaContent, "0"+(i++));
         }
     }

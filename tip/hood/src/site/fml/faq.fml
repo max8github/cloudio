@@ -1,0 +1,139 @@
+<?xml version="1.0"?>
+<faqs xmlns="http://maven.apache.org/FML/1.0.1"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://maven.apache.org/FML/1.0.1 http://maven.apache.org/xsd/fml-1.0.1.xsd"
+      title="Frequently Asked Questions"
+      toplink="false">
+   <part id="Hood">
+      <title>Hood</title>
+      <faq id="whats-hood">
+         <question>What is Cloudio</question>
+         <answer>
+            <p>
+               Toy code playing with Google Cloud distributed object store.
+            </p>
+         </answer>
+      </faq>
+      <faq id="why-hood">
+         <question>Why Hood?</question>
+         <answer>
+            <p>
+               Cloudio is meant to show examples of application level Cloud storage.
+            </p>
+         </answer>
+      </faq>
+   </part>
+   <part id="Dev: Build and Settings">
+      <title>Build and Settings</title>
+      <faq id="localRepository">
+         <question>
+            I do not have enough space in my home directory for maven jars
+         </question>
+         <answer>
+            <p>
+               You can set a different location for your
+               Maven local repository, by specifying it in settings.xml.
+               By default, Maven will download all build artifacts needed
+               to compile in directory $home/.m2/repository. Maven populates that on demand when
+               you issue mvn commands: it represents your local cache for building.
+               By setting the localRepository tag appropriately
+               in your settings.xml, you will get around the issue.
+               See <a href="./private_settings.html">settings.xml</a> for instructions
+               over settings.xml.
+            </p>
+         </answer>
+      </faq>
+      <faq id="cantBuld">
+         <question>
+            I cannot build.
+         </question>
+         <answer>
+            <p>
+               * Make sure you have Maven and Java as specified in the System Requirements
+               section of the Setup page Picking Java less then 7 and Maven less than 3
+               will not work! Check this by issuing:
+               <pre>
+                  mvn --version
+               </pre>
+               which should give you something similar to:
+               <pre>
+                  Apache Maven 3.0.3 (r1075438; 2011-02-28 09:31:09-0800)
+                  Maven home: /home/max/apps/apache-maven-3.0.3
+                  Java version: 1.7.0_05, vendor: Oracle Corporation
+                  Java home: /home/max/apps/jdk1.7.0_05/jre
+                  Default locale: en_US, platform encoding: UTF-8
+                  OS name: "linux", version: "2.6.32-45-generic", arch: "amd64", family: "unix"
+               </pre>
+            </p>
+         </answer>
+      </faq>
+   </part>
+   <part id="Misc">
+      <title>Misc</title>
+      <faq id="why-apt-site">
+         <question>Why APT wiki and Maven site as opposed to corporate's mediawiki?</question>
+         <answer>
+            <p>
+               Reasons:
+               <ol>
+                  <li>one source of content, <b>many formats</b>, such as pdf and html.
+                  </li>
+                  <li>ability to use <b>versioning</b> along with code</li>
+                  <li>ability to leverage <b>reviewboard</b> for comments, changes, reviews
+                     on architecture documents and proposals</li>
+                  <li>one documentation source that has better chances to be
+                     <b>more up-to-date</b> with the code.
+                  </li>
+                  <li>
+                     <b>A standard project information</b> location like found in
+                     Open Source projects.
+                     A site that gathers all project-related information such as
+                     how to build, how to run, how to get the sources, javadoc,
+                     architecture documentation, issue tracking, point of contact,
+                     maintainers, mailing lists, etc.
+                  </li>
+                  <li>
+                     Rich <b>plugin</b> and integration functionality with other
+                     documentation tools such as
+                     <a href="http://plantuml.sourceforge.net/">PlantUML</a>,
+                     Adobe pdf, Javadoc, etc.
+                  </li>
+                  <li>
+                     Automatic <b>reporting</b> about project, such as dependencies,
+                     licenses, which are typically required information from
+                     <b>legal</b>, security, project management.
+                  </li>
+                  <li>Content becomes portable and <b>editable locally</b> on
+                     your machine and can be read without <b>rendering</b>.</li>
+                  <li>Better style, format and graphics overall. No effort in
+                     format/look and feel (getting the standard).
+                  </li>
+                  <li>
+                     Typically developers need fairly straightforward and <b>basic formatting</b>
+                     in their documents such as paragraphs, lists, images. APT
+                     fits the requirement.
+                  </li>
+               </ol>
+            </p>
+         </answer>
+      </faq>
+   </part>
+   <part id="Repository Manager">
+      <title>Repository Manager</title>
+      <faq id="what-is-a-repo-manager">
+         <question>What is a Repository Manager?</question>
+         <answer>
+            <p>See here:<a href="docs/NexusBook.pdf">Nexus Book</a></p>
+         </answer>
+      </faq>
+   </part>
+   <part id="Maven Book">
+      <title>Maven Book</title>
+      <faq id="what-is-maven">
+         <question>What is a Maven?</question>
+         <answer>
+            <p>See here:<a href="docs/betterbuildswithmaven.pdf">Better Builds with Maven 2008</a></p>
+         </answer>
+      </faq>
+   </part>
+</faqs>

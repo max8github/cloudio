@@ -115,10 +115,6 @@ public class LargeFileTest {
                  props.getProperty("awsSecretKey"));
       }
 
-      /*vblob = new VblobServerStub(EnumSet.of(VblobServerStub.Servers.START_DS,
-              VblobServerStub.Servers.START_MDSERVER));
-      vblob.start();*/
-
       s3Client = new AmazonS3Client(credentials);
       String endpoint = "http://" + dataserverHost + ":" + dataserverPort;
       s3Client.setEndpoint(endpoint);
@@ -154,7 +150,7 @@ public class LargeFileTest {
       //Create bucket:
       random = new Random(System.currentTimeMillis());
       FIXED_BUCKET_NAME += Math.abs(random.nextLong());
-      TUtility.View.decoratedPrint("\nvBlob to create bucket" + FIXED_BUCKET_NAME);
+      TUtility.View.decoratedPrint("\n to create bucket" + FIXED_BUCKET_NAME);
       Bucket bucket = s3Client.createBucket(FIXED_BUCKET_NAME);
       Assert.assertNotNull(bucket);
       TUtility.View.decoratedPrint(bucket + " created!");
@@ -162,7 +158,7 @@ public class LargeFileTest {
 
    @Test
    public void testPutObject() throws Exception {
-      TUtility.View.decoratedPrint("vBlob Client doing a put");
+      TUtility.View.decoratedPrint("Client doing a put");
       objectname = random.nextLong() + ".bin";
       TUtility.View.decoratedPrint("objectname = " + objectname);
       ObjectMetadata objMd = new ObjectMetadata();
@@ -229,6 +225,6 @@ public class LargeFileTest {
 
    @AfterClass
    public void shutdownClass() throws Exception {
-      //vblob.stop();
+      //hood.stop();
    }
 }

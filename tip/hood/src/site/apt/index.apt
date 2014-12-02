@@ -1,0 +1,47 @@
+ -----
+ hood
+ -----
+ The Team
+ -----
+
+hood
+
+ This is the hood Project website maily dedicated to <<Developers>>, <<Legal>> and <<Security>>.
+
+ In this website you will find <<technical information>> about {{{./sources.html}sources}}, how to get them, how to
+{{{./sources.html#Build}compile}}, how to run {{{./sources.html#Integration_Tests}integration tests}}.
+
+ It also contains useful information about {{{./dependencies.html}dependencies}},
+{{{./license.html}licenses}}, {{{./dependency-management.html}software and libraries}} that are
+used by this project with detailed information about
+linking and compiling to them. This information might be interesting to <<Legal>>.
+
+ Contains <<{{{./mmmmmm/apidocs/index.html}Javadoc}}>>, mailing lists,
+point of contact, maintainers, <<{{{./faq.html}FAQ}}>>, and information
+on how to run, configure and deploy hood.
+
+ Please use the <<navigation>> to the left in order to find about Continuous Integration,
+bugs, licenses, logging, etc.
+
+ This website is generated off of our build, and for that it contains the most
+up-to-date information on our sources. It will be generated approximately
+once per week during development.
+
+ This very content you are reading is generated off of our sources: this content resides in <apt> files within
+hood's source tree. Content is generated off of apt files by using Maven's site generation (maven site plugin).
+
+* What is hood
+
+ <hood> is toy code using distributed storage.\
+Uses provider's API for storing files in the form of objects, under buckets.
+ Providers can be Amazon, Google, etc.
+
+
+~~cd cloudio/hood
+~~mvn site:site
+
+~~To generate an aggregate list of all dependencies, do:
+~~cd cloudio
+~~mvn -o dependency:list > depsFile.bak
+~~cat depsFile.bak | grep "\[INFO\][^:]*:[^:]*:[^:]*:[^:]*:.*" | cut -d] -f2- | sort -u > depsFileSorted.bak
+

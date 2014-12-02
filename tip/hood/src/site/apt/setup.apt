@@ -1,0 +1,86 @@
+                         ----------------------------------
+                              Dev Set up Instructions
+                         ----------------------------------
+                               Massimo Calderoni
+                              -------------------
+                                 2013-09-10
+                              -------------------
+
+ <<Contents>>
+
+=====================
+
+%{toc}
+
+=====================
+
+
+
+Dev Setup
+
+ Please note that our System Requirements are:
+
+ * <<Java 7>>
+
+ * <<Maven 3>>
+
+ * <<Git>>
+
+* Java
+
+ Install Java 7 and set the <<<JAVA_HOME>>> environment variable to point to
+root directory of the Java installation.
+
+* Maven
+
+ Install Maven and issue command:
+
++----------------
+mvn --version
++----------------
+ to verify that it correctly finds Java: Maven finds Java by looking at the env
+var <<<JAVA_HOME>>> .
+
+
+* Git
+
+  To access the git repository, you need to follow instructions at
+{{{https://github.com}SCM-git}}
+to publish your public key.\
+
+ Our git repository is at {{https://github.com/max8github/cloudio}}
+
+** Git Merges and Rebasing
+
+ Please never merge, only rebase. See {{{./gitmerges.html}git merge and rebase}}
+for instructions.
+
+** Git Remote Branches
+
+ To use private remote branches (<<Topic branches>>), see {{{./gitbranches.html}git branches}}
+
+
+* settings.xml
+
+ Maven relies on a file called <<<settings.xml>>> to find remote repositories and
+other settings that are specific to your environment. That file exists so that
+you do not hard-code specific values in your code, like FS paths, IP addresses or
+port numbers.\
+ By default, that file is located in your home directory at:
+
+-----
+~/.m2/settings.xml
+-----
+ That file is created by Maven when you run Maven for the first time, so, if
+the file is not already there, just create it.
+
+ You need to manually edit <<<settings.xml>>> with your specifics.
+A <<{{{./private_settings.html}sample settings.xml}}>> you can adapt from can be found {{{./private_settings.html}here}}.
+
+ <<Maven documentation about settings.xml is {{{http://maven.apache.org/settings.html}here}} >>.
+
+
+
+Troubleshooting
+
+ See {{{./faq.html}FAQ}} section.

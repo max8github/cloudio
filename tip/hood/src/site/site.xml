@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="cloudio">
+   <body>
+      <links>
+         <item name="Google" href="https://cloud.google.com" />
+         <item name="Google Cloud wiki" href="https://cloud.google.com/docs/"/>
+      </links>
+
+      <breadcrumbs>
+         <item name="hood" href="index.html"/>
+      </breadcrumbs>
+
+      <menu name="Overview">
+         <item name="Introduction" href="index.html"/>
+         <item name="Documents" href="documents.html"/>
+         <item name="Dev Set up" href="setup.html"/>
+         <item name="settings.xml" href="private_settings.html"/>
+         <item name="Sources and Build" href="sources.html"/>
+         <item name="Configuration" href="configuration.html"/>
+         <item name="Deployment" href="deploymentToNexus.html"/>
+         <item name="Integration Tests" href="integrationtests.html"/>
+         <item name="Run" href="run.html"/>
+         <item name="Git Branching" href="gitbranches.html"/>
+         <item name="IDE tips" href="ideTips.html"/>
+         <item name="Logging" href="logging.html"/>
+         <item name="FAQ" href="faq.html"/>
+         <item name="Nexus" href="deploymentToNexus.html"/>
+         <item name="APT Format" href="http://maven.apache.org/doxia/references/apt-format.html"/>
+      </menu>
+
+      <menu ref="reports"/>
+      <menu ref="modules" />
+
+      <menu name="Misc">
+         <item name="APT Format" href="http://maven.apache.org/doxia/references/apt-format.html"/>
+      </menu>
+
+      <!--<footer>All rights reserved. ${project.organization.name} </footer>-->
+   </body>
+</project>

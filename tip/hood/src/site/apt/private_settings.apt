@@ -1,0 +1,123 @@
+                         ----------------------------------
+                              Set up Instructions
+                         ----------------------------------
+                               Massimo Calderoni
+                              -------------------
+                                 2014-01-28
+                              -------------------
+
+ <<Contents>>
+
+=====================
+
+%{toc}
+
+=====================
+
+
+Sample settings.xml File
+
+ <<Please read the {{{./setup.html}Set up page}} for setup instructions>>.
+
+ <Maven documentation> about settings.xml can be found here:
+{{{http://maven.apache.org/settings.html}http://maven.apache.org/settings.html}}.
+
+ A sample settings.xml file that you can copy/adapt from is found in the source
+tree at:
+
++------------------------------------------------------------------------------
+hood/settings.xml
++------------------------------------------------------------------------------
+
+ <<Please note that the above file should be first checked visually and adapted
+before being used in the build, as it is likely to contain incorrect values.\
+ The purpose of that file is to give an idea on how your specific
+~/.m2/settings.xml should look like.>>
+
+ Apart from parameters relating configuration (please see template for those
+under the profiles section), the sections you <<must have>> in your
+<<<settings.xml>>> are:
+
++------------------------------------------------------------------------------
+   <proxies>
+      <proxy>
+         <active>true</active>
+         <protocol>http</protocol>
+         <host>proxy.whatever.com</host>
+         <port>3128</port>
+         <nonProxyHosts>www.whatever.com|*.whatever.com</nonProxyHosts>
+      </proxy>
+      <proxy>
+         <active>true</active>
+         <protocol>https</protocol>
+         <host>proxy.whatever.com</host>
+         <port>3128</port>
+         <nonProxyHosts>www.whatever.com|*.whatever.com</nonProxyHosts>
+      </proxy>
+   </proxies>
+
+   <!--Forces connections to our proxy Repository Manager-->
+   <mirrors>
+      <mirror>
+         <id>nexus</id>
+         <url>mirrorurl</url>
+         <mirrorOf>*</mirrorOf>
+      </mirror>
+   </mirrors>
++------------------------------------------------------------------------------
+ Please make sure those are exactly as shown above, or else you might not
+even be able to get passed building.
+
+ The profile sections contain mostly information that you need for deployment
+and integration tests.
+
+
+
+Adding Properties
+
+ During development, we might need to add more parameters to <<<settings.xml>>> for token resolution.\
+ For that, developers should <<document the additions>> by editing our sample <<<hoodsrc/settings.xml>>>,
+which is under source-control and <<send an email do dev>>, so that team members are notified.
+
+ Additionally, if the parameter is required and has no default, the developer adding that parameter should also
+<<enforce>> that fact with the maven-enforcer-plugin, in such a way that the build will fail if the required parameters
+are not set correctly by developers in their settings.xml.
+ For that, the developer making the addition should go edit <<<hood/pom.xml>>>, look for <<<maven-enforcer-plugin>>>
+and mimic the same enforcement present for other parameters.
+
+ However, if a parameter has a reasonable default, the developer adding the parameter should add the default
+by using a profile in <<<hood/pom.xml>>>, not <<<settings.xml>>>. Example:
+
++---------------------------
+      <profile>
+         <id>default_statsReportPeriod</id>
+         <activation>
+            <property>
+               <name>!statsReportPeriod</name>
+            </property>
+         </activation>
+         <properties>
+            <initialDelay>60</initialDelay>
+         </properties>
+      </profile>
++--------------------------
+ By adding the profile containing parameter <<<statsReportPeriod>>> like shown above inside our main pom
+<<<hood/pom.xml>>>, will not cause developers to necessarily edit their own settings.xml, because if the
+new parameter is not set in their settings.xml, its default specified in <<<hood/pom.xml>>> will be picked by
+the build.
+
+
+ So, to summarize: parameters that have <<reasonable defaults>> should go under our <<main pom>> (see snippet above
+for syntax), while parameters that should be specifically set because they do <<not>> have a reasonable default like
+<<IP addresses or absolute paths>> should go into <<settings.xml>>. When in the latter case, the process is:
+
+ [[1]] add key-value in your required config file with tokens
+
+ [[2]] update our sample <<<hood/settings.xml>>> so that developers can have a reference to copycat from
+
+ [[3]] enforce parameter use by editing in <<<hood/pom.xml>>> in its <<<maven-enforcer-plugin>>> section
+
+[]
+
+ For reference, see
+{{{https://maven.apache.org/settings.html#Activation}Maven profile activation}}.
