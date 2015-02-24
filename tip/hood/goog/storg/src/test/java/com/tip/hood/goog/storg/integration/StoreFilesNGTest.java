@@ -48,13 +48,13 @@ public class StoreFilesNGTest {
 
         // Initialize transport...
         HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-        //then json factory...
-        jsonFactory = JacksonFactory.getDefaultInstance();
 
         //...then data store factory. Best practice is to make it a single globally shared
         //instance across your application.
         FileDataStoreFactory dataStoreFactory = new FileDataStoreFactory(dataStoreDir);
 
+        //then json factory...
+        jsonFactory = JacksonFactory.getDefaultInstance();
         //..then authorization...
         Credential credential = Utils.authorize(httpTransport, jsonFactory, dataStoreFactory, clientSecretsJsonPath);
         //...then a Storage instance for the client
@@ -78,7 +78,7 @@ public class StoreFilesNGTest {
      * @return the array of base plus snaps (n+1)
      * @throws IOException
      */
-    RandomContent.DataBlockInputStream[] createImagesOnDisk(long baseObjectSize, int blockSize, int n)
+    static RandomContent.DataBlockInputStream[] createImagesOnDisk(long baseObjectSize, int blockSize, int n)
             throws IOException {
         Random r = new Random();
         //initial img
@@ -101,7 +101,7 @@ public class StoreFilesNGTest {
      * @return the array of base plus snaps (n+1)
      * @throws IOException
      */
-    File[] createBinFilesOnDisk(long baseObjectSize, int blockSize, int n)
+    static File[] createBinFilesOnDisk(long baseObjectSize, int blockSize, int n)
             throws IOException {
         RandomContent.DataBlockInputStream[] s = createImagesOnDisk(baseObjectSize, blockSize, n);
         File[] dumpStream = new File[s.length];

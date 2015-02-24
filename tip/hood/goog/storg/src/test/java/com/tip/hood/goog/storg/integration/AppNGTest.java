@@ -36,7 +36,8 @@ import org.testng.annotations.Test;
 public class AppNGTest {
 
     /**
-     * Global configuration of Google Cloud Storage, OAuth 2.0.
+     * This is the storage scope to be used with OAuth 2.0 (Google Cloud Storage).
+     * This string goes into the scope header in the OAuth request.
      */
     private static final String STORAGE_SCOPE
             = "https://www.googleapis.com/auth/devstorage.read_write";
