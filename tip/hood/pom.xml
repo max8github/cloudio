@@ -51,6 +51,35 @@
             </properties>
         </profile>
         <!-- Configuration for unit/integration tests section 3 of 3 (profiles) ENDS HERE.-->
+        
+        <!--
+        DEFAULTS PARAMETERS SECTION.
+        See http://skynet-admin.eng.vmware.com/~nexus/vblob/private_settings.html#Adding_Properties
+        -->
+        <profile>
+            <id>default_clientSecretsJsonPath</id>
+            <activation>
+                <property>
+                    <name>!clientSecretsJsonPath</name>
+                </property>
+            </activation>
+            <properties>
+                <clientSecretsJsonPath>~/.store/storage_sample/client_secrets.json</clientSecretsJsonPath>
+            </properties>
+        </profile>
+
+        <!-- Configuration for Data Server, STARTS HERE.-->
+        <profile>
+            <id>default_dataStoreDir</id>
+            <activation>
+                <property>
+                    <name>!dataStoreDir</name>
+                </property>
+            </activation>
+            <properties>
+                <dataStoreDir>~/.store/storage_sample</dataStoreDir>
+            </properties>
+        </profile>
     </profiles>    
 
     <build>
