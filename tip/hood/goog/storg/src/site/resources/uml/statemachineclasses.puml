@@ -1,0 +1,30 @@
+@startuml
+abstract class VblobHttpContainer
+abstract Workflow
+abstract SequentialWorkflow
+
+abstract ServerRequestHandler
+abstract SequentialWorkflowHandler
+
+VblobHttpContainer <|-- Workflow
+Workflow <|-- SequentialWorkflow
+SequentialWorkflow <|-- DataServerRequest
+DataServerRequest <|-- MultiPartRequest
+DataServerRequest <|-- RequestCopyObject
+DataServerRequest <|-- RequestGetObject
+DataServerRequest <|-- RequestHeadObject
+DataServerRequest <|-- RequestPostObject
+DataServerRequest <|-- RequestListBucket
+
+
+Workflow --> "1" ServerRequestHandler
+
+ServerRequestHandler <|-- SequentialWorkflowHandler
+SequentialWorkflowHandler <|-- RingCopyObject
+SequentialWorkflowHandler <|-- RingDeleteObject
+SequentialWorkflowHandler <|-- RingPutObject
+SequentialWorkflowHandler <|-- RingHeadObject
+SequentialWorkflowHandler <|-- RingCreateMultiPartObject
+
+
+@enduml

@@ -1,0 +1,48 @@
+@startuml
+abstract class DataServerRequest
+abstract class MultiPartRequest
+
+DataServerRequest <|-- MultiPartRequest
+MultiPartRequest <|-- RequestMultiPartAbort
+MultiPartRequest <|-- RequestMultiPartComplete
+MultiPartRequest <|-- RequestMultiPartInitiate
+MultiPartRequest <|-- RequestMultiPartList
+MultiPartRequest <|-- RequestMultiPartUpload
+MultiPartRequest <|-- RequestMultiPartUploadsList
+
+
+RequestMultiPartAbort --> "1" BeginCommonMultiPart
+RequestMultiPartAbort --> "1" RingGetMultiPartObject
+RequestMultiPartAbort --> "1" RingAbortMultiPart
+
+RequestMultiPartComplete --> "1" BeginCommonMultiPart
+RequestMultiPartComplete --> "1" RingGetMultiPartObject
+RequestMultiPartComplete --> "1" RingCompleteMultiPart
+RequestMultiPartComplete --> "1" MdsPutObject
+RequestMultiPartComplete --> "1" EndCompleteMultiPart
+
+RequestMultiPartInitiate --> "1" BeginInitiateMultiPart
+RequestMultiPartInitiate --> "1" RingCreateMultiPartObject
+RequestMultiPartInitiate --> "1" RingGetMultiPartUploadsObject
+RequestMultiPartInitiate --> "1" RingUpdateMultiPartUploadsObject
+RequestMultiPartInitiate --> "1" EndInitiateMultiPart
+
+RequestMultiPartList --> "1" BeginCommonMultiPart
+RequestMultiPartList --> "1" RingGetMultiPartObject
+RequestMultiPartList --> "1" EndListMultiPart
+
+RequestMultiPartUpload --> "1" BeginUploadMultiPart
+RequestMultiPartUpload --> "1" RingGetMultiPartObject
+RequestMultiPartUpload --> "1" RingValidateMultiPartObject
+RequestMultiPartUpload --> "1" RingPutObject
+RequestMultiPartUpload --> "1" RingGetMultiPartObject
+RequestMultiPartUpload --> "1" RingUpdatePartMultiPartObject
+RequestMultiPartUpload --> "1" EndUploadMultiPart
+
+RequestMultiPartUploadsList --> "1" BeginListMultiPartUploads
+RequestMultiPartUploadsList --> "1" RingGetMultiPartUploadsObject
+RequestMultiPartUploadsList --> "1" EndListMultiPartUploads
+
+
+
+@enduml

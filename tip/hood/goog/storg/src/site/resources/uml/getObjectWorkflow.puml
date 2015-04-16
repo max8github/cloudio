@@ -1,0 +1,27 @@
+@startuml
+User --> DataServlet: GET Object request\n<b>without version</b> \n <b>information</b>
+'this is something like a curl over GET /bucketname/objectpath
+DataServlet -> Key: new Key(objectname, bucketName)
+Key -> DataServlet: versionObjectId -- of type Key
+'If a version id is not given to DataServlet, like it is in this use case,
+'DataServlet will create the version object id off of it doing:
+'Key versionObjectId = new Key(objectname, bucketName);
+'Now DataServlet can fetch version object's information saved in the ring.
+'The information needed here is the user's meta information of the version
+'object. Specifically: latest version id and delete marker.
+DataServlet --> Sproxyd: fetchUserMetaVersionObject(versionObjectId)
+Sproxyd -> DataServlet: user meta version object
+'Now DS has the version object's meta from which it can get the info of where the object is
+'that is, its object id), because the metadata of the version object has the
+'convenient field of the last version object id.
+'First, check if the object has a delete marker (assume here that is false):
+DataServlet -> DataServlet: getDeleteMarker() is false {if true, just return "deleted"}
+'Now from the user's object name and bucket, recalculate the object id, by
+'using Key:
+DataServlet -> Key: new Key(objectName, bucketname, latestVersionId)
+Key -> DataServlet: objectID
+'Now DS invokes sproxyd to get the actual object
+DataServlet --> Sproxyd: fetchObject(objectID)
+Sproxyd --> DataServlet: object
+DataServlet --> User: object
+@enduml

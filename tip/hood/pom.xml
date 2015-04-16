@@ -28,7 +28,40 @@
             <url>http://c.storage.googleapis.com:8081/nexus/content/repositories/cloudio/</url>
         </repository>
     </distributionManagement>
+
+    <issueManagement>
+        <system>Github Issues</system>
+        <url>https://github.com/max8github/cloudio/issues</url>
+    </issueManagement>
+
+    <ciManagement>
+        <url>https://jenkins.suchandsuchhq.com/job/suchandsuch_develop/</url>
+    </ciManagement>
+    
+    <scm>
+        <connection>https://github.com/max8github/cloudio.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/max8github/cloudio.git</developerConnection>
+        <url>https://github.com/max8github/cloudio</url>
+        <tag>HEAD</tag>
+    </scm>
    
+    <developers>
+        <developer>
+            <name>Max</name>
+            <email>someemail@somedomain.com</email>
+            <organization></organization>
+            <organizationUrl>www.max.com</organizationUrl>
+            <properties>
+                <picUrl>http://www.gravatar.com/avatar/df23097939a7022cdb4813a391fc8816.png</picUrl>
+            </properties>
+            <roles>
+                <role>Developer</role>
+            </roles>
+            <timezone>-8</timezone>
+        </developer>
+    </developers>
+    
+    
     <profiles>
         <!--
         Configuration for unit/integration tests section 3 of 3 (profiles) STARTS HERE.
@@ -54,7 +87,6 @@
         
         <!--
         DEFAULTS PARAMETERS SECTION.
-        See http://skynet-admin.eng.vmware.com/~nexus/vblob/private_settings.html#Adding_Properties
         -->
         <profile>
             <id>default_clientSecretsJsonPath</id>
@@ -67,8 +99,6 @@
                 <clientSecretsJsonPath>~/.store/storage_sample/client_secrets.json</clientSecretsJsonPath>
             </properties>
         </profile>
-
-        <!-- Configuration for Data Server, STARTS HERE.-->
         <profile>
             <id>default_dataStoreDir</id>
             <activation>
@@ -80,6 +110,36 @@
                 <dataStoreDir>~/.store/storage_sample</dataStoreDir>
             </properties>
         </profile>
+        
+        <profile>
+         <id>build_number</id>
+         <activation>
+            <property>
+               <name>!env.BUILD_NUMBER</name>
+            </property>
+         </activation>
+         <build>
+            <plugins>
+               <plugin>
+                  <groupId>org.codehaus.mojo</groupId>
+                  <artifactId>buildnumber-maven-plugin</artifactId>
+                  <executions>
+                     <execution>
+                        <phase>validate</phase>
+                        <goals>
+                           <goal>create</goal>
+                        </goals>
+                     </execution>
+                  </executions>
+                  <configuration>
+                     <doCheck>false</doCheck>
+                     <doUpdate>false</doUpdate>
+                     <shortRevisionLength>8</shortRevisionLength>
+                  </configuration>
+               </plugin>
+            </plugins>
+         </build>
+      </profile>
     </profiles>    
 
     <build>
@@ -190,7 +250,7 @@
                                     </message>
                                 </requireProperty>
                             </rules>
-                            <fail>true</fail>
+                            <fail>false</fail>
                         </configuration>
                     </execution>
                 </executions>

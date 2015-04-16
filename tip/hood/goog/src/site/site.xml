@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project xmlns="http://maven.apache.org/DECORATION/1.3.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/DECORATION/1.3.0 http://maven.apache.org/xsd/decoration-1.3.0.xsd"
+         name="vblob servers" >
+   <body>
+      <links>
+         <item name="Github" href="http://github.com/" />
+         <item name="wiki" href="https://github.com/max8github/cloudio/wiki"/>
+      </links>
+
+      <menu ref="parent"/>
+
+      <breadcrumbs>
+         <item name="hood" href="index.html"/>
+      </breadcrumbs>
+
+      <menu ref="reports"/>
+      <menu ref="modules" />
+
+      <footer>All rights reserved. ${project.organization.name} </footer>
+   </body>
+</project>

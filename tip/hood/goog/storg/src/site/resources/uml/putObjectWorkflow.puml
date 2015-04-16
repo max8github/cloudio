@@ -1,0 +1,20 @@
+@startuml
+User --> DataServlet: PUT request\nof an object\n<b>without version info</b>
+DataServlet -> Key: new Key(objectname, bucketName, Key.genVersionId())
+Key -> DataServlet: objectId -- of type Key
+DataServlet --> Sproxyd: putObject(objectId)
+Sproxyd --> DataServlet: success/failure {assume success}
+DataServlet --> MdsServlet: putObject(ID, bucket, objName)
+MdsServlet --> Sproxyd: getHead(ID) {if not cached}
+MdsServlet --> Sproxyd: getHead(WAL)
+Sproxyd --> MdsServlet: return
+Sproxyd --> MdsServlet: return
+MdsServlet --> Sproxyd: getVersion(ID)
+MdsServlet -> MdsServlet: generate version
+MdsServlet --> Sproxyd: putObject()
+MdsServlet --> Sproxyd: putObject(WAL)
+Sproxyd --> MdsServlet: version
+Sproxyd --> MdsServlet: WAL
+MdsServlet --> DataServlet: success/failure
+DataServlet --> User: md5 of object
+@enduml

@@ -1,0 +1,37 @@
+@startuml
+User --> DataServlet: GET Object request\n<b>with version</b>
+'this is something like a curl over GET /bucketname/objectpath
+'THIS FILE IS NOT FINAL: ON THE WORKS
+'1. Read the version object.
+'2. Parse the array list (collection of all version records) and check if the
+'   version requested by client is in the list.
+'3. If version doesn't exist return 404 not found
+'4. If version exists check if the record is deleted or not
+'5. If the record is deleted (isdeleted == true), return 404 not found
+'6. If (isdeleted == false), this is valid record, get the object id
+'   (ring key) and return the data by reading it from sproxyd.
+
+DataServlet -> Key: new Key(objectname, bucketName, versionid)
+Key -> DataServlet: versionObjectId -- of type Key
+'If a version id is not given to DataServlet, like it is in this use case,
+'DataServlet will create the version object id off of it doing:
+'Key versionObjectId = new Key(objectname, bucketName);
+'Now DataServlet can fetch version object's information saved in the ring.
+'The information needed here is the user's meta information of the version
+'object. Specifically: latest version id and delete marker.
+DataServlet --> Sproxyd: getVersionObject(versionObjectId)
+Sproxyd -> DataServlet: version object
+'Now DS has the version object's meta from which it can get the info of where the object is
+'that is, its object id), because the metadata of the version object has the
+'convenient field of the last version object id.
+'First, check if the object has a delete marker (assume here that is false):
+DataServlet -> DataServlet: getDeleteMarker() is false {if true, just return "deleted"}
+'Now from the user's object name and bucket, recalculate the object id, by
+'using Key:
+DataServlet -> Key: new Key(objectName, bucketname, latestVersionId)
+Key -> DataServlet: objectID
+'Now DS invokes sproxyd to get the actual object
+DataServlet --> Sproxyd: fetchObject(objectID)
+Sproxyd --> DataServlet: object
+DataServlet --> User: object
+@enduml

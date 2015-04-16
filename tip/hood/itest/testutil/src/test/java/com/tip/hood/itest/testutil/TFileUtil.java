@@ -20,7 +20,7 @@ public final class TFileUtil {
    /**
     * Generates n temp files with random content. Please note that the root of
     * the file name (its initial part of the name) is always the same
-    * ({@link TFileUtil.FIXED_FILENAME}).
+    * ({@link #FIXED_FILENAME}).
     *
     * @param n number of text files to create along with there MD5. All file
     * names will start with the same name with an increasing number appended to

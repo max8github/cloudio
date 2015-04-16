@@ -1,0 +1,102 @@
+                       ------------------------------------
+                     Data Server Set up and Run Instructions
+                              ------------------
+                               Massimo Calderoni
+                              ------------------
+                                 2014-01-03
+
+Run Dataserver Instructions
+
+ Instructions are different depending on team and purpose:
+if you are a developer, see the IDE or CLI section, if you are QE or Deployment,
+follow the next section.
+
+ These instructions are good for dataserver, but for all other servers are similar.
+
+* Deployment
+
+ This section is for <<deployers>>, that is for someone willing to deploy vblob from an RPM.
+
+** Generate the RPM
+
+ After <<building>> (with <<<mvn clean install>>>), issue command:
+
++----------------
+cd vblob/dataserver
+mvn -P generate-rpm-dataserver package
++----------------
+ which will generate the rpm file that you will need to <<install>>. The rpm
+file will be located at (rpm file name will depend on the build number):\
+ <<<storg/target/rpm/storg/RPMS/x86_64/storg-0.1-b1209068.x86_64.rpm>>>
+
+** Configuration
+
+ Before starting servers, you need to <<edit>> configuration files present in directory <<</etc/vblob/dataserver>>>.
+Those configuration files are xml and properties files that contain tokens representing startup parameters that must be
+resolved before starting the server.\
+ Tokens are in the form: <<<${mytoken}>>>.\
+ You need to read the related documentation in order to understand how to set different parameters.\
+For example, for Jetty's parameters, use
+{{{http://wiki.eclipse.org/Jetty/Howto/Configure_Jetty}Jetty's documentation on configuration}} and for logging
+parameters, use {{{http://logback.qos.ch/manual/configuration.html}Logback's documentation}}.
+For vblob's parameters there is currently only one file: <<<dataserver.properties>>>.\
+ A <<sample dataserver.properties>> you can adapt from can be found in the sources
+under the dataserver module.
+
+ Note: Your SDK client needs to have <<<regions.xml>>> configured correctly when testing dataserver.\
+ For an example, see how system property <<<com.amazonaws.regions.RegionUtils.fileOverride>>> is used in dev tests (see
+class <<<com.company.project.integration.S3IntegrationTest>>>).
+
+** Run
+
+ In order to <<run dataserver>>, do:
+
++----------------
+service goog start
++----------------
+ You do similarly for other commands such as <<<stop>>>, <<<restart>>>, <<<status>>>. Example:
+
++----------------
+service goog stop
++----------------
+
+
+* IDE
+
+ This section is for <<developers>>.
+
+** vBlob Starter
+
+ The easiest thing to do in order to start vblob is to run a class called <<<VblobStarterTest>>>, which lives in module
+<<<itest/experimental>>>.\
+ Take a look at its code: its code only starts dataserver (DS), mdserver (MDS) and stats server (STATSVC).
+Look at the line where VblobServerStub's constructor is called to see how that is done.\
+ Class <<<VblobStarterTest>>> uses an API (we call it "stubs"), which lives in itest/api.
+
+ This is the easiest, because after compiling all vblob sources, the entire vblob system is already configured for you.
+
+** How it works
+
+ <Note>: For the entire rationale behind all this, please see {{{../../configuration.html}here}}.
+
+ <Note>: these section is only useful to understand how things work and maybe to debug: not so much for starting servers.
+ If you wanted to start servers manually or have fine grain detail on how to start and what, you should just use our
+"stubs" (<<<itest/api>>>) API.
+
+ In order to be able to run one vblob server alone (or any vblob server), you need to (1) make sure all configuration
+is correctly set and available, and (2) run its main class Main.java.
+
+ Code assumes that configuration is present in the <<classpath>>. So, as long as configuration files are somehow available
+in the classpath, all will work (for example, you could place necessary configuration files for your tests under
+<<<src/test/resources>>>).
+
+ In order to minimize configuration files in our source tree however, it is best <<not>> to create new ones by duplicating
+the ones under dataserver, mds , etc if you don't have to: just reuse the ones already there by <<importing>> them into
+your classpath.
+
+ For that, we wrap the configuration into jars called <<<servername>-testConfig.jar>>> (example: <<<dataserver-testConfig.jar>>>).\
+so that tests just need to include the given jar into its classpath. These jars have configuration already resolved in
+them by the build (that is why you have to build first: Maven will resolve all tokens with settings.xml).\
+ For an example, see <<<pom.xml>>> in modules <<<itest/experimental>>> or <<<itest/regression>>>: in their pom.xml
+they include 'testConfig' dependencies so that configuration can be injected.\
+ Note that <<<testConfig>>> dependencies only contain configuration files - they have no code in them.

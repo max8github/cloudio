@@ -77,7 +77,6 @@ public class FileGen {
     *
     * @param filesize Size of the file
     * @param blocksize Block size to use to write the file
-    * @param byte contains either -1 or the byte to use for this file
     * @return
     */
    public File getNewFile(int filesize, int blocksize, int content) throws IOException {
