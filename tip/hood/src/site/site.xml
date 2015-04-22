@@ -24,7 +24,6 @@
          <item name="IDE tips" href="ideTips.html"/>
          <item name="Logging" href="logging.html"/>
          <item name="FAQ" href="faq.html"/>
-         <item name="Nexus" href="deploymentToNexus.html"/>
          <item name="APT Format" href="http://maven.apache.org/doxia/references/apt-format.html"/>
       </menu>
 

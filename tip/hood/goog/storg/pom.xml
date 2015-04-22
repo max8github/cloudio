@@ -17,6 +17,29 @@
     </properties>
     
     <build>
+        <plugins>
+            <plugin>
+                <!-- http://asciidoctor.org/docs/asciidoctor-maven-plugin/#configuration-options -->
+                <groupId>org.asciidoctor</groupId>
+                <artifactId>asciidoctor-maven-plugin</artifactId>
+                <configuration>
+                    <executions>
+                        <execution>
+                            <id>output-html</id> 
+                            <phase>generate-resources</phase> 
+                            <goals>
+                                <goal>process-asciidoc</goal> 
+                            </goals>
+                            <configuration>
+                                <backend>docbook</backend>
+                                <doctype>book</doctype>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </configuration>
+            </plugin>
+        </plugins>
+        
         <testResources>
             <testResource>
                 <directory>src/test/resources/conf</directory>

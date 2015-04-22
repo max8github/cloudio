@@ -39,9 +39,9 @@
     </ciManagement>
     
     <scm>
-        <connection>https://github.com/max8github/cloudio.git</connection>
+        <!--<connection>https://github.com/max8github/cloudio.git</connection>-->
         <developerConnection>scm:git:ssh://git@github.com/max8github/cloudio.git</developerConnection>
-        <url>https://github.com/max8github/cloudio</url>
+        <!--<url>https://github.com/max8github/cloudio</url>-->
         <tag>HEAD</tag>
     </scm>
    
@@ -415,6 +415,11 @@
                             <artifactId>wagon-ssh</artifactId>
                             <version>1.0</version>
                         </dependency>
+                        <dependency>
+                            <groupId>org.asciidoctor</groupId>
+                            <artifactId>asciidoctor-maven-plugin</artifactId>
+                            <version>1.5.2</version>
+                        </dependency>
                     </dependencies>
                 </plugin>
                 <plugin>
@@ -469,6 +474,11 @@
                     <configuration>
                         <debug>true</debug>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.asciidoctor</groupId>
+                    <artifactId>asciidoctor-maven-plugin</artifactId>
+                    <version>1.5.2</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -810,11 +820,6 @@
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-entitymanager</artifactId>
                 <version>4.1.8.Final</version>
-            </dependency>
-            <dependency>
-                <groupId>postgresql</groupId>
-                <artifactId>postgresql</artifactId>
-                <version>9.3-1100.jdbc4</version>
             </dependency>
             <dependency>
                 <groupId>org.hibernate</groupId>

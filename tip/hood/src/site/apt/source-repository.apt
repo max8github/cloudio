@@ -15,6 +15,7 @@ Developer Access
 
  Only project developers can access the Git tree via this method.
 Substitute username and password with the proper values.
+
 ----------------------------------------
 $ git clone https://github.com/max8github/cloudio
 ----------------------------------------
