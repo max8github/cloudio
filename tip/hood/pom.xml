@@ -488,6 +488,7 @@
         <module>aws</module>
         <module>itest</module>
         <module>goog</module>
+        <module>net</module>
     </modules>
     
     <dependencyManagement>
