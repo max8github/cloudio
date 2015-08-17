@@ -107,7 +107,18 @@
                 </property>
             </activation>
             <properties>
-                <dataStoreDir>~/.store/storage_sample</dataStoreDir>
+                <dataStoreDir>${user.home}/.store/storage_sample</dataStoreDir>
+            </properties>
+        </profile>
+        <profile>
+            <id>default_googleDrivePropertiesDir</id>
+            <activation>
+                <property>
+                    <name>!googleDrivePropertiesDir</name>
+                </property>
+            </activation>
+            <properties>
+                <googleDrivePropertiesDir>${user.home}/.store</googleDrivePropertiesDir>
             </properties>
         </profile>
         

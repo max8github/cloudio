@@ -22,7 +22,7 @@
                 <!-- http://asciidoctor.org/docs/asciidoctor-maven-plugin/#configuration-options -->
                 <groupId>org.asciidoctor</groupId>
                 <artifactId>asciidoctor-maven-plugin</artifactId>
-<!--                <configuration>
+                <!--                <configuration>
                 </configuration>-->
                 <executions>
                     <execution>
@@ -35,6 +35,32 @@
                             <backend>html</backend>
                             <doctype>book</doctype>
                         </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.fredericvauchelles</groupId>
+                <artifactId>google-drive-maven-plugin</artifactId>
+                <version>1.0-SNAPSHOT</version>
+                <configuration>
+                    <googleClientProperties>${googleDrivePropertiesDir}/googleDrive.properties</googleClientProperties>
+                    <googleDrivePropertiesDirectory>${googleDrivePropertiesDir}</googleDrivePropertiesDirectory>
+                    <mimeType>text/plain</mimeType>
+                    <fileset>
+                        <directory>src/main/resources</directory>
+                        <includes>
+                            <include>file.txt</include>
+                        </includes>
+                    </fileset>
+                    <parentId>0BzyrPVnYJwC9fmVEdXpiLWtJZThFWHpnMHNxc19zRlpjQTJjc3ZDMzE5RzE1VnB3SjhCaDg</parentId>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>upload file</id>
+                        <phase>post-site</phase>
+                        <goals>
+                            <goal>upload-file</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>
