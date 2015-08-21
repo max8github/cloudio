@@ -3,7 +3,7 @@
    <modelVersion>4.0.0</modelVersion>
    <groupId>com.tip.hood</groupId>
    <artifactId>configkv-maven-plugin</artifactId>
-   <version>0.4.3</version>
+   <version>0.5</version>
    <name>Config Key-Value Store Maven Plugin</name>
    <packaging>maven-plugin</packaging>
 
