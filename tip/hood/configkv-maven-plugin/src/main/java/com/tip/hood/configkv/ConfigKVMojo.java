@@ -136,13 +136,41 @@ public class ConfigKVMojo extends AbstractMojo {
 
         //Combine the two sets of properties into one file. First write the non-default ones,
         //then the default ones
+      
+        
+        
+//        #
+//#NONE of the values in this section should be taken as is: these are *NOT* defaults.
+//#This section must be edited by the deployer for the system to function.
+//#The values present for each key are only here to show an *example* of a value for a key, not to be used.
+//#Whoever deploys the system with this configuration, must first *EDIT* this section manually.
+//#This section contains settings such as IP addresses, absolute paths, password, usernames, etc, all properties
+//#that need to be given as input to the system to execute.
+
+//################ DEFAULTS Section ###############
+//#
+//#This section contains default values.
+//#These values should be considered fine for most deployments.
+//#The deployer does not necessarily need to change these values: 
+//#the app will run fine with the settings below in most deployments.
+//#
+//########################################################
         File outFile = new File(outputDirectory, filepath);
-        String edit_Section = "###############KEY-VALUE STORE OF CONFIGURATION###############\n"
-                + "This file represents all configurable properties in your application, provided\n"
-                + "that you have declared them in your top pom.xml and settings.xml like specified\n"
-                + "in the wiki.\n"
+        String edit_Section = "################ KEY-VALUE STORE OF CONFIGURATION ###############\n"
+                + "#\n"
+                + "This file represents the set of all configurable properties in your application, provided\n"
+                + "that the maintainer of the app has declared configurable properties as specified in the configkv maven plugin.\n"
+                + "In short, configurable properties should be declared in the top pom.xml of the project and in settings.xml\n"
+                + "as specified in the documentation for the configkv maven plugin.\n"
+                + "#\n"
+                + "This file is a key/value store of configurable properties in a system.\n"
+                + "It has two sections. The last section contains defaults, that is values that the deployer does not necessarily need\n"
+                + "to set. The system will reasonably work with those default values.\n"
+                + "The first section instead contains values that need to be overridden before deploying the system. The system\n"
+                + "will not run without correctly setting this section.\n"
+                + "#\n"
                 + "#######################################################\n\n\n"
-                + "###############EDIT Section###############\n"
+                + "############### MANDATORY Section ###############\n"
                 + "Please note: the deployer should *EDIT* this section manually\n"
                 + "before using the file for replacing tokens\n"
                 + "#######################################################";
