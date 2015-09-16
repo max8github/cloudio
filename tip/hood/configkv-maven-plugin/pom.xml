@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.tip.hood</groupId>
     <artifactId>configkv-maven-plugin</artifactId>
-    <version>0.7</version>
+    <version>0.8</version>
     <name>Config Key-Value Store Maven Plugin</name>
     <packaging>maven-plugin</packaging>
 
@@ -11,13 +11,40 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <!--TODO: specify the correct bucket-->
     <distributionManagement>
         <repository>
-            <id>Someid</id>
-            <name>Some Repo</name>
-            <url>TBD</url>
+            <id>mc-aws</id>
+            <name>S3 Repository</name>
+            <url>s3://mcalderonirepo</url>
         </repository>
     </distributionManagement>
+    <repositories>
+        <repository>
+            <id>hood-aws</id>
+            <name>S3 Repository</name>
+            <url>s3://mcalderonirepo</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>mc-aws</id>
+            <name>S3 Repository</name>
+            <url>s3://mcalderonirepo</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
 
     <dependencies>
         <dependency>
@@ -82,6 +109,13 @@
 
     <build>
         <defaultGoal>clean install</defaultGoal>
+        <extensions>
+            <extension>
+                <groupId>org.springframework.build</groupId>
+                <artifactId>aws-maven</artifactId>
+                <version>5.0.0.RELEASE</version>
+            </extension>
+        </extensions>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

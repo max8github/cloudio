@@ -38,8 +38,8 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
  * <pre>
  * &lt;plugin&gt;
  *      &lt;groupId&gt;com.tip.hood&lt;/groupId&gt;
- *      &lt;artifactId&gt;configkv&lt;/artifactId&gt;
- *      &lt;version&gt;0.4.2&lt;/version&gt;
+ *      &lt;artifactId&gt;configkv-maven-plugin&lt;/artifactId&gt;
+ *      &lt;version&gt;0.8&lt;/version&gt;
  *      &lt;executions&gt;
  *          &lt;execution&gt;
  *              &lt;phase&gt;post-clean&lt;/phase&gt;
@@ -289,7 +289,8 @@ public class ConfigKVMojo extends AbstractMojo {
                 String key = (String) entry.getKey();
                 String value = (String) entry.getValue();
                 String kl = key.toLowerCase();
-                if(kl.contains("password") || kl.contains("secret")) {
+                if(kl.contains("password") || kl.contains("secret") || kl.contains("username") || 
+                        kl.contains("user") || kl.contains("accesskey")) {
                     value = "xxxxxxxx";
                 }
                 props.put(key, value);

@@ -85,6 +85,10 @@ public final class ConfigXMLUtil {
     public static Map<String, String> findIllegitDefaults(Model project) throws DOMException {
         Map<String, String> map = new LinkedHashMap<>();
         Model.Profiles profiles = project.getProfiles();
+        if(profiles == null) {
+            logger.info("There were no profiles specified in your pom.xml");
+            return map;
+        }
         List<Profile> profile = profiles.getProfile();
         for (Profile p : profile) {
             //we are interested in only profiles that contain default properties. By convention of this plugin,
