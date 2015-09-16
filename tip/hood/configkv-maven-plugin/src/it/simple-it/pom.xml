@@ -31,4 +31,219 @@
          </plugin>
       </plugins>
    </build>
+    <profiles>
+        <!--
+        Configuration for unit/integration tests section 3 of 3 (profiles) STARTS HERE.
+        Use the following profile to run Integration tests. From the command line:
+        mvn clean install -P integration-test
+        or:
+        mvn integration-test -P integration-test
+        * Note that if you do: 'mvn test -P integration-test'
+        integration tests will not run, because the test phase is before the
+        integration phase in the default maven lifecycle.
+        * Also note that unit tests will also be run when integration tests are
+        run, because the integration-test phase is always after the test phase
+        in the default Maven lifecycle.
+        See also: surefire plugin section and properties section.
+        -->
+        <profile>
+            <id>integration-test</id>
+            <properties>
+                <SKIP_INTEGRATION_TESTS>false</SKIP_INTEGRATION_TESTS>
+            </properties>
+        </profile>
+        <!-- Configuration for unit/integration tests section 3 of 3 (profiles) ENDS HERE.-->
+        
+        <!--
+        ######################################### DATABASE OF INJECTABLE CONFIGURATION PROPERTIES #####################
+        TLDR: this section is for *defaults* in configuration parameters.
+        These defaults will land inside config-default.yml file (and other config files).
+        NOTE that config-default.yml is resolved under target, not under src.
+        
+        Detail
+        The following maven profiles, conventionally named with prefix "default_", are used to set default values 
+        to configuration properties in Tinker that are not explicitly set by developers in their own settings.xml file.
+        For example, the property named subsystems.gateway.port is set to be 9023 if not specified in settings.xml.
+        For one profile you have one property (sorry, just verbose).
+        The following list of "default_*" profiles represents a key-value store of properties.
+        All these properties will be injected by Maven when building in files containing tokens.
+        For example, if a resource file (that is a file under a 'resources' directory) contains token 
+        ${subsystems.gateway.port}, Maven will copy that resource file over to the target directory substituting the 
+        token with value 9023.
+        The tokenized file is under src/main/resources. The resolved file, which is the one that counts at runtime, is
+        under the target directory.
+        That applies to any resource file (yml, XML, properties, whatever text file) containing tokens if they are declared as
+        filtered in pom.xml (look for the tag '<filtering>' in pom.xml to see an example).
+        The advantage of having this pom section with these "default_" profiles is to:
+            (1) be able to inject properties in different text files from one source, this pom.xml, which, 
+            along with settings.xml, effectively becomes the central key-value store for all injectable properties.
+            (2) some properties can be resolved into absolute paths, where applicable, by
+            using Maven-defined tokens such as ${project.basedir}. This helps in avoiding hard-coded paths in
+            source-controlled files, which is not good practice (makes builds machine-dependent).
+            (3) if a property cannot have a reasonable default, that property should be placed in settings.xml rather than here,
+            as this pom.xml file is under source control: settings.xml is not. File settings.xml by definition contains
+            settings that are specific to the target machine in use, like IP addresses, passwords, account names, etc.
+            (4) properties specified here can be overridden, if so wished, by defining them in ~/.m2/settings.xml. If
+            for example you have in settings.xml:
+            <profile>
+                <id>myprofileid</id>
+                <activation>
+                    <activeByDefault>true</activeByDefault>
+                </activation>
+                <properties>
+                    <subsystems.gateway.port>5599</subsystems.gateway.port>
+                </properties>
+            </profile>
+            then Maven will resolve the file containing token ${subsystems.gateway.port} with 5599, overriding 9023
+            specified here.
+        References:
+        http://maven.apache.org/plugins/maven-resources-plugin/examples/filter.html
+        https://maven.apache.org/examples/injecting-properties-via-settings.html
+        http://maven.apache.org/guides/introduction/introduction-to-the-pom.html#Project_Interpolation
+        -->
+        <profile>
+            <id>default_subsystems.gateway.port</id>
+            <activation>
+                <property>
+                    <name>!subsystems.gateway.port</name>
+                </property>
+            </activation>
+            <properties>
+                <subsystems.gateway.port>9023</subsystems.gateway.port>
+            </properties>
+        </profile>
+        <profile>
+            <id>default_subsystems.http.port</id>
+            <activation>
+                <property>
+                    <name>!subsystems.http.port</name>
+                </property>
+            </activation>
+            <properties>
+                <subsystems.http.port>9080</subsystems.http.port>
+            </properties>
+        </profile>
+        <profile>
+            <id>default_subsystems.http.secure_port</id>
+            <activation>
+                <property>
+                    <name>!subsystems.http.secure_port</name>
+                </property>
+            </activation>
+            <properties>
+                <subsystems.http.secure_port>7043</subsystems.http.secure_port>
+            </properties>
+        </profile>
+        <profile>
+            <id>default_subsystems.security.keystore.path</id>
+            <activation>
+                <property>
+                    <name>!subsystems.security.keystore.path</name>
+                </property>
+            </activation>
+            <properties>
+                <subsystems.security.keystore.path>${project.basedir}/TinkerHttpsCertificate.jks</subsystems.security.keystore.path>
+            </properties>
+        </profile>
+        <profile>
+            <id>default_subsystems.gateway.secure</id>
+            <activation>
+                <property>
+                    <name>!subsystems.gateway.secure</name>
+                </property>
+            </activation>
+            <properties>
+                <subsystems.gateway.secure>false</subsystems.gateway.secure>
+            </properties>
+        </profile>
+        <profile>
+            <id>default_tinkerHost</id>
+            <activation>
+                <property>
+                    <name>!tinkerHost</name>
+                </property>
+            </activation>
+            <properties>
+                <tinkerHost>127.0.0.1</tinkerHost>
+            </properties>
+        </profile>
+        <profile>
+            <id>default_reroute_outgoing_mail_to</id>
+            <activation>
+                <property>
+                    <name>!reroute_outgoing_mail_to</name>
+                </property>
+            </activation>
+            <properties>
+                <reroute_outgoing_mail_to>testemail@heighten.com</reroute_outgoing_mail_to>
+            </properties>
+        </profile>
+        <profile>
+            <id>default_system_binary_html5_file</id>
+            <activation>
+                <property>
+                    <name>!system_binary_html5_file</name>
+                </property>
+            </activation>
+            <properties>
+                <system_binary_html5_file>${project.basedir}/../../js/framework/target/classes/javascript/lib/tk-system-models.js</system_binary_html5_file>
+            </properties>
+        </profile>
+        <profile>
+            <id>default_system_binary_ios_dir</id>
+            <activation>
+                <property>
+                    <name>!system_binary_ios_dir</name>
+                </property>
+            </activation>
+            <properties>
+                <system_binary_ios_dir>${project.basedir}/../../ios/HeightenSales</system_binary_ios_dir>
+            </properties>
+        </profile>
+        <profile>
+            <id>default_config.test.calibration_mode_enabled</id>
+            <activation>
+                <property>
+                    <name>!config.test.calibration_mode_enabled</name>
+                </property>
+            </activation>
+            <properties>
+                <config.test.calibration_mode_enabled>false</config.test.calibration_mode_enabled>
+            </properties>
+        </profile>
+        <profile>
+            <id>default_subsystems.http.published_base_url</id>
+            <activation>
+                <property>
+                    <name>!subsystems.http.published_base_url</name>
+                </property>
+            </activation>
+            <properties>
+                <subsystems.http.published_base_url>http://localhost:9080</subsystems.http.published_base_url>
+            </properties>
+        </profile>
+        <profile>
+            <id>default_subsystems.connector.cacheTTL</id>
+            <activation>
+                <property>
+                    <name>!subsystems.connector.cacheTTL</name>
+                </property>
+            </activation>
+            <properties>
+                <subsystems.connector.cacheTTL>1440</subsystems.connector.cacheTTL>
+            </properties>
+        </profile>
+        <profile>
+            <id>default_heighten-dev-configyml</id>
+            <activation>
+                <property>
+                    <name>!heighten-dev-configyml</name>
+                </property>
+            </activation>
+            <properties>
+                <heighten-dev-configyml>${user.home}/heighten-dev-config.yml</heighten-dev-configyml>
+            </properties>
+        </profile>
+        <!--##################### DATABASE OF INJECTABLE CONFIGURATION PROPERTIES ENDS HERE #########################-->
+    </profiles>
 </project>

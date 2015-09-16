@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import javax.xml.bind.JAXBException;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.plugin.AbstractMojo;
@@ -34,24 +35,27 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
  * property present in the source tree of the entire project. The plugin assumes that configuration properties are saved
  * in profiles in settings.xml and as defaults in the main pom.xml file (the container of the whole source tree. It also
  * assumes that the default properties in pom.xml are contained in profiles, whose id starts with the string "default_".
- * <code>
- * <plugin>
- * <groupId>com.tip.hood</groupId>
- * <artifactId>configkv</artifactId>
- * <version>0.4.2</version>
- * <executions>
- * <execution>
- * <phase>post-clean</phase>
- * <goals>
- * <goal>configkv</goal>
- * </goals>
- * </execution>
- * </executions>
- * </plugin>
- * </code>
- *
+ * <pre>
+ * &lt;plugin&gt;
+ *      &lt;groupId&gt;com.tip.hood&lt;/groupId&gt;
+ *      &lt;artifactId&gt;configkv&lt;/artifactId&gt;
+ *      &lt;version&gt;0.4.2&lt;/version&gt;
+ *      &lt;executions&gt;
+ *          &lt;execution&gt;
+ *              &lt;phase&gt;post-clean&lt;/phase&gt;
+ *              &lt;goals&gt;
+ *                  &lt;goal&gt;configkv&lt;/goal&gt;
+ *              &lt;/goals&gt;
+ *          &lt;/execution&gt;
+ *      &lt;/executions&gt;
+ * &lt;/plugin&gt;
+ * </pre>
+ * Or from the command line:<br>
+ * <pre>
+ *      mvn com.tip.hood:configkv-maven-plugin:0.7:configkv
+ * </pre>
  */
-@Mojo(name = "configkv", defaultPhase = LifecyclePhase.PROCESS_SOURCES, aggregator = false)
+@Mojo(name = "configkv", defaultPhase = LifecyclePhase.PROCESS_SOURCES, aggregator = true)
 public class ConfigKVMojo extends AbstractMojo {
 
     static final String DEFAULT = "default_";
@@ -107,6 +111,7 @@ public class ConfigKVMojo extends AbstractMojo {
         } else {
             //Get the top level pom of the entire tree (first one in reactor list)
             model = projects.get(0).getModel();
+            pomXml = model.getPomFile();
         }
 
         //If settings.xml is provided by the user, use that one, else the standard one will be used.
@@ -121,7 +126,7 @@ public class ConfigKVMojo extends AbstractMojo {
 
         Properties defaultProps = Properties.Factory.getInstance();
         Properties nonDefaultProps = Properties.Factory.getInstance();
-        
+
         //All properties with defaults are assumed to be in the pom.
         //It is also assumed that profiles containing defaults
         //have id that starts with "default_".
@@ -136,9 +141,6 @@ public class ConfigKVMojo extends AbstractMojo {
 
         //Combine the two sets of properties into one file. First write the non-default ones,
         //then the default ones
-      
-        
-        
 //        #
 //#NONE of the values in this section should be taken as is: these are *NOT* defaults.
 //#This section must be edited by the deployer for the system to function.
@@ -146,7 +148,6 @@ public class ConfigKVMojo extends AbstractMojo {
 //#Whoever deploys the system with this configuration, must first *EDIT* this section manually.
 //#This section contains settings such as IP addresses, absolute paths, password, usernames, etc, all properties
 //#that need to be given as input to the system to execute.
-
 //################ DEFAULTS Section ###############
 //#
 //#This section contains default values.
@@ -156,28 +157,28 @@ public class ConfigKVMojo extends AbstractMojo {
 //#
 //########################################################
         File outFile = new File(outputDirectory, filepath);
-        String edit_Section = "################ KEY-VALUE STORE OF CONFIGURATION ###############\n"
+        String edit_Section = "########### KEY-VALUE STORE OF CONFIGURATION ####################\n"
                 + "#\n"
                 + "This file represents the set of all configurable properties in your application, provided\n"
-                + "that the maintainer of the app has declared configurable properties as specified in the configkv maven plugin.\n"
+                + "that the developers of the app have declared configurable properties in pom.xml and settings.xml.\n"
                 + "In short, configurable properties should be declared in the top pom.xml of the project and in settings.xml\n"
                 + "as specified in the documentation for the configkv maven plugin.\n"
                 + "#\n"
                 + "This file is a key/value store of configurable properties in a system.\n"
-                + "It has two sections. The last section contains defaults, that is values that the deployer does not necessarily need\n"
-                + "to set. The system will reasonably work with those default values.\n"
-                + "The first section instead contains values that need to be overridden before deploying the system. The system\n"
-                + "will not run without correctly setting this section.\n"
+                + "It has two sections. The bottom section contains defaults, that is values that the deployer does not necessarily need\n"
+                + "to set. The system is supposed to reasonably work with those default values.\n"
+                + "The first section instead contains values that must be overridden before deploying the system. The system\n"
+                + "will not run without correctly setting this mandatory section.\n"
                 + "#\n"
                 + "#######################################################\n\n\n"
-                + "############### MANDATORY Section ###############\n"
-                + "Please note: the deployer should *EDIT* this section manually\n"
-                + "before using the file for replacing tokens\n"
+                + "############### MANDATORY Section #####################\n"
+                + "Please note: the deployer must *FILL IN* this section manually\n"
+                + "before using this file for replacing tokens in a deployment.\n"
                 + "#######################################################";
         save(nonDefaultProps, edit_Section, outFile, false);
-        String defaults_Section = "###############DEFAULTS Section###############\n"
+        String defaults_Section = "###############DEFAULTS Section########################\n"
                 + "This section contains values that should already be fine for deployment\n"
-                + "The deployer does not necessarily need to change these values\n"
+                + "The deployer does not necessarily need to change these values, if not so wished\n"
                 + "#######################################################";
         save(defaultProps, defaults_Section, outFile, true);
 
@@ -225,24 +226,39 @@ public class ConfigKVMojo extends AbstractMojo {
     }
 
     private void extractPropsFromPom(Properties defaultProps, Properties nonDefaultProps) {
+
+        //Have to first find the properties that start with "${", because those are not defaults.
+        //If the property contains a dollar symbol, then it is a property
+        //that has been set among defaults, but still contains a token to be resolved by Maven.
+        //That means that this one property cannot be taken as is by the deployer: the deployer must change it.
+        //So this property goes in the non-defaults section.
+        //In order to find these properties, i have to parse the plain XML of pom.xml as text: i cannot
+        //use Maven's objects, because by the time those objects are given to me, Maven has already
+        //resolved all tokens (tokens are the ones starting with dollar-curly brace).
+        try (FileInputStream in = new FileInputStream(pomXml)) {
+            org.maven.pom.Model project = ConfigXMLUtil.unmarshal(in, null);
+            Map<String, String> illegitDefaults = ConfigXMLUtil.findIllegitDefaults(project);
+            Set<Map.Entry<String, String>> entrySet = illegitDefaults.entrySet();
+            for (Map.Entry<String, String> e : entrySet) {
+                nonDefaultProps.put(e.getKey(), e.getValue());
+            }
+        } catch (IOException | JAXBException ex) {
+            throw new IllegalStateException("Could not find file or I/O issue", ex);
+        }
+
         for (org.apache.maven.model.Profile profile : model.getProfiles()) {
             //we are interested in only profiles that contain default properties. By convention of this plugin,
-            //it is assumed that all those profiles are named starting with "default_" and contain only one 
+            //it is assumed that all those profiles are named starting with "default_" and contain only one
             //property each.
             if (profile.getId().startsWith(DEFAULT)) {
                 java.util.Properties properties = profile.getProperties();
                 Map.Entry<Object, Object> entry = validateDefaultProfile(properties);
                 String value = (String) entry.getValue();
-                //look at the value of property first. If the property contains a dollar symbol, then it is a property
-                //that has been set among defaults, but still contains a token to be resolved by Maven.
-                //That means that this one property cannot be taken as is by the deployer: the deployer must change it.
-                //So this property goes in the non-defaults section.
-                if (value.contains("$")) {
-                    nonDefaultProps.put((String) entry.getKey(), value);
-                } else {
-                    defaultProps.put((String) entry.getKey(), value);
+                String key = (String) entry.getKey();
+                //check first if this is an illegitimate default
+                if (!nonDefaultProps.containsKey(key)) {
+                    defaultProps.put(key, value);
                 }
-
             }
         }
     }
@@ -270,7 +286,13 @@ public class ConfigKVMojo extends AbstractMojo {
             java.util.Properties properties = profile.getProperties();
             Set<Map.Entry<Object, Object>> entrySet = properties.entrySet();
             for (Map.Entry<Object, Object> entry : entrySet) {
-                props.put((String) entry.getKey(), (String) entry.getValue());
+                String key = (String) entry.getKey();
+                String value = (String) entry.getValue();
+                String kl = key.toLowerCase();
+                if(kl.contains("password") || kl.contains("secret")) {
+                    value = "xxxxxxxx";
+                }
+                props.put(key, value);
             }
         }
     }
