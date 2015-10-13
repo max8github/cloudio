@@ -11,12 +11,41 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <!--TODO: specify the correct bucket-->
+    <!--
+    This section, distributionManagement, has tokens so that it can work with different repositories. 
+    It does not have to be that way, it can be more simply hard-coded here.
+    If not hard-coded, then settings.xml must contain something like the following so that tokens can be resolved
+    when doing 'mvn deploy':
+    ###################################################################################################################
+    <settings>
+        <activeProfiles>
+            <activeProfile>hoodStuff</activeProfile>
+        </activeProfiles>
+        <profile>
+            <id>hoodStuff</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <hood.distributionManagement.repository.id>hood-aws</hood.distributionManagement.repository.id>
+                <hood.distributionManagement.repository.name>S3 Repository</hood.distributionManagement.repository.name>
+                <hood.distributionManagement.repository.url>s3://mcalderonirepo</hood.distributionManagement.repository.url>
+                <hood.distributionManagement.site.id>mc-aws</hood.distributionManagement.site.id>
+                <hood.distributionManagement.site.url>s3://mcalderonirepo</hood.distributionManagement.site.url>
+            </properties>
+        </profile>
+    </settings>
+    ###################################################################################################################
+    -->
     <distributionManagement>
+        <site>
+            <id>${hood.distributionManagement.site.id}</id>
+            <url>${hood.distributionManagement.site.url}</url>
+        </site>
         <repository>
-            <id>mc-aws</id>
-            <name>S3 Repository</name>
-            <url>s3://mcalderonirepo</url>
+            <id>${hood.distributionManagement.repository.id}</id>
+            <name>${hood.distributionManagement.repository.name}</name>
+            <url>${hood.distributionManagement.repository.url}</url>
         </repository>
     </distributionManagement>
     <repositories>
