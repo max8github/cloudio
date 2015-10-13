@@ -55,7 +55,7 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
  *      mvn com.tip.hood:configkv-maven-plugin:0.7:configkv
  * </pre>
  */
-@Mojo(name = "configkv", defaultPhase = LifecyclePhase.PROCESS_SOURCES, aggregator = true)
+@Mojo(name = "configkv", defaultPhase = LifecyclePhase.INITIALIZE, aggregator = true)
 public class ConfigKVMojo extends AbstractMojo {
 
     static final String DEFAULT = "default_";
