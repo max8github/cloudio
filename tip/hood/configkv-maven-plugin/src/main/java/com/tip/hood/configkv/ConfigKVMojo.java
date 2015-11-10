@@ -71,6 +71,13 @@ public class ConfigKVMojo extends AbstractMojo {
      */
     @Parameter(defaultValue = "configdkv.properties", property = "file", required = false)
     private String filepath;
+    
+    /**
+     * Outputs the key-value file with detailed header and comment information.
+     * If set to false, comments are minimized in the output key-value file.
+     */
+    @Parameter(defaultValue = "true", property = "verbose", required = false)
+    private boolean verbose;
 
     @Parameter(defaultValue = "${settings}", property = "_settings", required = false, readonly = true)
     private Settings _settings;
@@ -157,7 +164,7 @@ public class ConfigKVMojo extends AbstractMojo {
 //#
 //########################################################
         File outFile = new File(outputDirectory, filepath);
-        String edit_Section = "########### KEY-VALUE STORE OF CONFIGURATION ####################\n"
+        String edit_Section = verbose? "########### KEY-VALUE STORE OF CONFIGURATION ####################\n"
                 + "#\n"
                 + "This file represents the set of all configurable properties in your application, provided\n"
                 + "that the developers of the app have declared configurable properties in pom.xml and settings.xml.\n"
@@ -165,6 +172,12 @@ public class ConfigKVMojo extends AbstractMojo {
                 + "as specified in the documentation for the configkv maven plugin.\n"
                 + "#\n"
                 + "This file is a key/value store of configurable properties in a system.\n"
+                + "Its purpose is to contain all cofigurable properties into one file only that can be used to inject "
+                + "resolved properties in any other configuration file in the system."
+                + "The deployer would run a script with this file as input so to substitute all tokens present in all"
+                + "configuration files in the distribution of the system."
+                + "This is similarly to how an installer operates while processing an installation of an app with user input"
+                + "through a Wizard with form fields. The equivalent of form fields is this key-value file."
                 + "It has two sections. The bottom section contains defaults, that is values that the deployer does not necessarily need\n"
                 + "to set. The system is supposed to reasonably work with those default values.\n"
                 + "The first section instead contains values that must be overridden before deploying the system. The system\n"
@@ -174,12 +187,14 @@ public class ConfigKVMojo extends AbstractMojo {
                 + "############### MANDATORY Section #####################\n"
                 + "Please note: the deployer must *FILL IN* this section manually\n"
                 + "before using this file for replacing tokens in a deployment.\n"
-                + "#######################################################";
+                + "#######################################################"
+                :"";
         save(nonDefaultProps, edit_Section, outFile, false);
-        String defaults_Section = "###############DEFAULTS Section########################\n"
+        String defaults_Section = verbose?"###############DEFAULTS Section########################\n"
                 + "This section contains values that should already be fine for deployment\n"
                 + "The deployer does not necessarily need to change these values, if not so wished\n"
-                + "#######################################################";
+                + "#######################################################"
+                :"";
         save(defaultProps, defaults_Section, outFile, true);
 
         getLog().info("\n\n**********************\n\n Saved Configuration database in file\n"
